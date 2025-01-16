@@ -1,0 +1,71 @@
+import * as React from 'react';
+import styles from './styles/SunoProjectCard.module.css';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardMedia from '@mui/material/CardMedia';
+import CardContent from '@mui/material/CardContent';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import { red } from '@mui/material/colors';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+// Custom hook for typing effect
+
+export default function RecipeReviewCard(props) {
+
+    const titleText = props.project.name;
+    const subheaderText = props.project.author;
+    const prompt = props.project.prompt;
+    const negativePrompt = props.project.negative;
+
+
+    return (
+        <Box sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            marginInline: 'auto',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '5px',
+            maxHeight: '60vh',
+            marginTop: '4vh',
+
+        }}>
+            <Card sx={{ maxWidth: 345, maxHeight: '60vh', minWidth: '15vw', borderRadius: '5px', }}>
+                <CardHeader
+                    className={styles.cardHeader}
+                    sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2 }}
+                    avatar={
+                        <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.project.avatarImage}>
+                        </Avatar>
+
+                    }
+                    title={<Typography className={styles.headerCard} variant="h6">{titleText}
+                        <Chip sx={{ height: '25px' }} label={props.project.playCount >= 1000
+                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.project.playCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.project.playCount}</div>}>
+                        </Chip>
+                    </Typography>}
+
+                    subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
+                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.project.upVoteCount >= 1000 ?
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='5px' sx={{ marginRight: "5px" }} /> {Math.floor(props.project.upVoteCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='5px' sx={{ marginRight: "5px" }} /> {props.project.upVoteCount}</div>}>
+                        </Chip>
+                    </Typography>}
+
+                />
+                <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column" }}>
+                        Style of Music : {prompt}
+                        {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
+                        <Chip label={props.project.modelVersion} size="small" sx={{ width: "auto", maxWidth: "fit-content", marginTop: "15px" }}></Chip>
+
+                    </Typography>
+                </CardContent>
+            </Card>
+
+        </Box>
+    );
+}

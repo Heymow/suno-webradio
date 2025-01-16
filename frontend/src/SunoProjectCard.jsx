@@ -75,7 +75,7 @@ export default function RecipeReviewCard(props) {
                     image={currentImage}
                     alt="Suno song image"
                     className={imageClass}
-                    sx={{ position: 'absolute', top: '10vh', left: 0, width: '100%', height: '73vh', objectPosition: 'center 40%', zIndex: 1 }}
+                    sx={{ position: 'absolute', top: '5vh', left: 0, width: '100%', height: '82vh', objectPosition: 'center 40%', zIndex: 1 }}
                 />
                 <CardHeader
                     className={styles.cardHeader}
@@ -101,16 +101,23 @@ export default function RecipeReviewCard(props) {
 
                 />
                 <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column" }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column", }}>
                         Style of Music : {prompt}
                         {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
-                        <Chip label={props.project.modelVersion} size="small" sx={{ width: "auto", maxWidth: "fit-content", marginTop: "15px" }}></Chip>
-                        {/* {props.project.audio && <audio type='file' controls src={props.project.audio} style={{ justifyContent: 'center', width: '100%' }}></audio>} */}
+                        <Chip label={props.project.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", }}></Chip>
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}><button className={styles.likeButton}>Vote</button></div>
 
                     </Typography>
+
+
                 </CardContent>
+
+
             </Card>
+
+
             <div style={{ zIndex: 1, marginTop: '-20px' }}>
+
                 {props.project.lyrics ? <div style={{ "marginLeft": "30px" }}>Lyrics</div> : null}
                 {props.project.lyrics && <CardContent
                     sx={{
@@ -131,7 +138,9 @@ export default function RecipeReviewCard(props) {
                         </Typography>
                     ))}
                 </CardContent>}
+
             </div>
+
         </Box>
     );
 }

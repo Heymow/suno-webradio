@@ -11,7 +11,7 @@
     opacity: 1;
     transition: opacity 3s ease-in-out;
     user-select: none;
-    transform: translateY(-38px);
+    /* transform: translateY(-38px); */
     -webkit-user-drag: element;
 
 }
@@ -35,4 +35,20 @@
 .headerCard {
     display: flex;
     justify-content: space-between;
+}
+
+.likeButton {
+    position: relative;
+    /* Retirez la position absolue pour le placer naturellement */
+    margin-top: 20px;
+    /* Ajoutez une marge pour le décaler vers le bas */
+    border-radius: 10px;
+    padding: 10px 20px;
+    background-color: #251db9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 20%;
 }
