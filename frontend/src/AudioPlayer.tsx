@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import AudioPlayer from "react-modern-audio-player";
-
+import styles from "./styles/AudioPlayer.module.css";
 
 const playList = [
     {

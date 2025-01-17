@@ -4,10 +4,12 @@ export const getSunoSong = async (sunoLink: string) => {
         const formattedLink = sunoLink.split('https://suno.com/song/')[1];
         const fetchSuno = await fetch(`http://localhost:3000/projects/get-suno-clip/${formattedLink}`)
         const response: { project: SunoSong } = await fetchSuno.json();
+        console.log(response.project);
         return response.project;
 
+
     } catch (error) {
-        console.error(error);
+        console.error("Error while fetching sunoSong", error);
         return null;
     }
 }

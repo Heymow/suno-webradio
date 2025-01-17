@@ -21,14 +21,16 @@ function App() {
   ];
 
   const fetchFromSuno = async (): Promise<void> => {
-    getSunoSong(sunoLink)
     const response = await getSunoSong(sunoLink)
-    response ?? setSunoProject(response)
+    response && setSunoProject(response)
   }
+
+  console.log("variable d'état", sunoProject)
 
   useEffect(() => {
     if (sunoLink) {
       fetchFromSuno()
+
     }
   }, [sunoLink]);
 
