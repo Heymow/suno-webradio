@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import AudioPlayer from "react-modern-audio-player";
-import SunoProjectCard from "./SunoProjectCard";
+import LightSunoCard from "./LightSunoCard";
 import styles from "./styles/App.module.css";
-import LightSongCard from "./LightSongCard";
+import SunoProjectCard from "./SunoProjectCard";
+import { getSunoSong } from "./services/sunoServices";
 
 function App() {
 
-  const [sunoProject, setSunoProject] = useState(null);
-  const [sunoLink, setSunoLink] = useState('');
+  const [sunoProject, setSunoProject] = useState<null | SunoSong>(null);
+  const [sunoLink, setSunoLink] = useState<string>('');
 
-  const playList = [
+  const playList: Playlist[] = [
     {
       name: sunoProject ? sunoProject.name : "",
       writer: sunoProject ? sunoProject.author : "",
@@ -18,18 +19,12 @@ function App() {
       id: 1,
     },
   ];
-  console.log(sunoProject)
 
-  let audioContext;
-
-  const fetchFromSuno = async () => {
-    const formattedLink = sunoLink.split('https://suno.com/song/')[1];
-
-    const fetchSuno = await fetch(`http://localhost:3000/projects/get-suno-clip/${formattedLink}`)
-    const response = await fetchSuno.json();
-    setSunoProject(response.project)
+  const fetchFromSuno = async (): Promise<void> => {
+    getSunoSong(sunoLink)
+    const response = await getSunoSong(sunoLink)
+    response ?? setSunoProject(response)
   }
-
 
   useEffect(() => {
     if (sunoLink) {
@@ -60,8 +55,8 @@ function App() {
               all: true,
               progress: "waveform",
               artwork: true,
-              repeatType: 0,
-              prevNnext: 0,
+              repeatType: false,
+              prevNnext: false,
               playList: false
             }}
             rootContainerProps={{ width: "40%" }}
@@ -74,12 +69,14 @@ function App() {
       </header>
 
       <div className={styles.content}>
-        {sunoProject ? <div className={styles.projectCardContainer}> <button className={styles.directButton}>Live</button> <SunoProjectCard project={sunoProject} /></div> :
+        {sunoProject ? <div className={styles.projectCardContainer}>
+          <button className={styles.directButton}>Live</button>
+          <SunoProjectCard {...sunoProject} /></div> :
           <div className={styles.cardContainer}>Renseignez le lien Suno pour faire apparaître votre projet
           </div>}
         <div className={styles.previousNextContainer}></div>
         <div className={styles.previousAndNextSongsContainer}>
-          {sunoProject ? <LightSongCard project={sunoProject} /> : ""}
+          {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
 
           <button className={styles.previousSongText} >
             ← Prev Song
@@ -87,7 +84,7 @@ function App() {
           <button className={styles.nextSongText}>
             Next Song →
           </button>
-          {sunoProject ? <LightSongCard project={sunoProject} /> : ""}
+          {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
         </div>
       </div>
 

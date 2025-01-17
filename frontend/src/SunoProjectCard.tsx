@@ -12,8 +12,8 @@ import Chip from '@mui/material/Chip';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 // Custom hook for typing effect
-const useTypingEffect = (fullText, speed = 10) => {
-    const [displayedText, setDisplayedText] = React.useState('');
+const useTypingEffect = (fullText: string, speed = 10) => {
+    const [displayedText, setDisplayedText] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         if (!fullText) return;
@@ -33,30 +33,30 @@ const useTypingEffect = (fullText, speed = 10) => {
     return displayedText;
 };
 
-export default function RecipeReviewCard(props) {
+export default function SunoProjectCard(props: SunoSong): JSX.Element {
 
     // Example texts with typing effect
-    const titleText = useTypingEffect(props.project.name, 70);
-    const subheaderText = useTypingEffect(props.project.author, 70);
-    const prompt = useTypingEffect(props.project.prompt, 30);
-    const negativePrompt = useTypingEffect(props.project.negative, 30);
+    const titleText = useTypingEffect(props.name, 70);
+    const subheaderText = useTypingEffect(props.author, 70);
+    const prompt = useTypingEffect(props.prompt, 30);
+    const negativePrompt = useTypingEffect(props.negative, 30);
 
     // Utiliser le hook pour l'ensemble des paroles comme une seule chaîne
-    const lyricsText = props.project.lyrics || "________________ Instrumental ________________";
+    const lyricsText = props.lyrics || "________________ Instrumental ________________";
     const typedLyrics = useTypingEffect(lyricsText, 1);
 
     const [imageClass, setImageClass] = React.useState(styles.imageHidden);
-    const [currentImage, setCurrentImage] = React.useState(props.project.songImage);
+    const [currentImage, setCurrentImage] = React.useState(props.songImage);
 
 
     React.useEffect(() => {
         setImageClass(styles.imageHidden);
         const timer = setTimeout(() => {
-            setCurrentImage(props.project.songImage);
+            setCurrentImage(props.songImage);
             setImageClass(styles.imageVisible);
         }, 1200); // Délai pour s'assurer que l'image est chargée avant de commencer la transition
         return () => clearTimeout(timer);
-    }, [props.project.songImage]);
+    }, [props.songImage]);
 
     return (
         <Box sx={{
@@ -81,21 +81,21 @@ export default function RecipeReviewCard(props) {
                     className={styles.cardHeader}
                     sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2 }}
                     avatar={
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.project.avatarImage}>
+                        <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.avatarImage}>
                         </Avatar>
 
                     }
                     title={<Typography className={styles.headerCard} variant="h6">{titleText}
-                        <Chip sx={{ height: '25px' }} label={props.project.playCount >= 1000
-                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.project.playCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.project.playCount}</div>}>
+                        <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
+                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.playCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.playCount}</div>}>
                         </Chip>
                     </Typography>}
 
                     subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
-                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.project.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='5px' sx={{ marginRight: "5px" }} /> {Math.floor(props.project.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='5px' sx={{ marginRight: "5px" }} /> {props.project.upVoteCount}</div>}>
+                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {props.upVoteCount}</div>}>
                         </Chip>
                     </Typography>}
 
@@ -104,7 +104,7 @@ export default function RecipeReviewCard(props) {
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column", }}>
                         Style of Music : {prompt}
                         {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
-                        <Chip label={props.project.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", }}></Chip>
+                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", }}></Chip>
                         <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}><button className={styles.likeButton}>Vote</button></div>
 
                     </Typography>
@@ -118,8 +118,8 @@ export default function RecipeReviewCard(props) {
 
             <div style={{ zIndex: 1, marginTop: '-20px' }}>
 
-                {props.project.lyrics ? <div style={{ "marginLeft": "30px" }}>Lyrics</div> : null}
-                {props.project.lyrics && <CardContent
+                {props.lyrics ? <div style={{ "marginLeft": "30px" }}>Lyrics</div> : null}
+                {props.lyrics && <CardContent
                     sx={{
                         maxWidth: 400,
                         maxHeight: '60vh',
@@ -132,7 +132,7 @@ export default function RecipeReviewCard(props) {
                         borderRadius: '4px',
                     }}
                 >
-                    {typedLyrics.split('\n').map((line, index) => (
+                    {typedLyrics?.split('\n').map((line, index) => (
                         <Typography variant="body2" key={index} sx={{ marginBottom: 1, color: 'rgba(0, 0, 0, 0.6)' }}>
                             {line}
                         </Typography>
