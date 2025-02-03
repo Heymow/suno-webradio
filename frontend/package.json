@@ -16,7 +16,8 @@
     "@mui/material": "^6.4.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "react-modern-audio-player": "^1.4.0-rc.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

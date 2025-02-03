@@ -25,12 +25,9 @@ function App() {
     response && setSunoProject(response)
   }
 
-  console.log("variable d'état", sunoProject)
-
   useEffect(() => {
     if (sunoLink) {
       fetchFromSuno()
-
     }
   }, [sunoLink]);
 
