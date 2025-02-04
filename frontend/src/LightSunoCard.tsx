@@ -12,8 +12,6 @@ import Chip from '@mui/material/Chip';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 
-// Custom hook for typing effect
-
 export default function RecipeReviewCard(props: SunoSong): JSX.Element {
     const {
         name: titleText,
