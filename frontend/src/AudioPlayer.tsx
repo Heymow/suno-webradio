@@ -76,7 +76,7 @@ function Player() {
                         all: true,
                         progress: "waveform",
                     }}
-                    rootContainerProps={{ width: "40%" }}
+                    rootContainerProps={{ width: "40%", marginTop: "10px" }}
                 />
             )}
         </div>
