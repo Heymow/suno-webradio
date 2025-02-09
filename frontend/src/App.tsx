@@ -44,7 +44,7 @@ function App() {
           </div>
         ) : (
           <div className={styles.cardContainer}>
-            Renseignez le lien Suno pour faire apparaître votre projet
+            Awaiting Radio...
           </div>
         )}
       </div>
@@ -59,7 +59,7 @@ function App() {
         <div className={styles.inputSunoLinkContainer}>
           <p style={{ fontWeight: 500 }}>Submit :</p>
           <input
-            placeholder="Collez les liens de vos morceaux Suno..."
+            placeholder="Paste your Suno song link here..."
             className={styles.inputSunoLink}
             onChange={(e) => {
               setSunoLink(e.target.value);
@@ -68,7 +68,7 @@ function App() {
           />
           <button className={styles.plusButton}> + </button>
         </div>
-        <div className={styles.explanatorytext}>explanatory text</div>
+        <div className={styles.explanatorytext}>Explanatory text</div>
       </footer>
     </div>
   );
