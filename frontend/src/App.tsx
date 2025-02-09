@@ -47,12 +47,12 @@ function App() {
             Renseignez le lien Suno pour faire apparaître votre projet
           </div>
         )}
-        <div className={styles.previousAndNextSongsContainer}>
-          {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
-          <button className={styles.previousSongText}>← Prev Song</button>
-          <button className={styles.nextSongText}>Next Song →</button>
-          {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
-        </div>
+      </div>
+      <div className={styles.previousAndNextSongsContainer}>
+        {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
+        <button className={styles.previousSongText}>← Prev Song</button>
+        <button className={styles.nextSongText}>Next Song →</button>
+        {sunoProject ? <LightSunoCard {...sunoProject} /> : ""}
       </div>
 
       <footer className={styles.footer}>
