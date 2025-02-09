@@ -27,8 +27,8 @@ function App() {
         <button className={styles.button}>Hits</button>
         <button className={styles.button}>New</button>
         <div className={styles.audioPlayer}>
-          {/* Le composant AudioPlayer gère lui-même la synchronisation */}
           <AudioPlayer />
+          <div className={styles.clickBlocker}></div>
         </div>
         <div className={styles.topRightButtonsContainer}>
           <button className={styles.topRightButtons}>Losange</button>

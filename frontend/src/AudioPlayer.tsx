@@ -77,9 +77,6 @@ function Player() {
                         progress: "waveform",
                     }}
                     rootContainerProps={{ width: "40%" }}
-                // onEnded={() => {
-                //     fetch("http://localhost:3000/player/next", { method: "POST" });
-                // }}
                 />
             )}
         </div>
