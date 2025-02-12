@@ -12,12 +12,16 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.0",
-    "@mui/material": "^6.4.0",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "@reduxjs/toolkit": "^2.5.1",
+    "axios": "^1.7.9",
+    "notistack": "^3.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.7.3",
-    "react-modern-audio-player": "^1.4.0-rc.2"
+    "react-modern-audio-player": "^1.4.0-rc.2",
+    "react-redux": "^9.2.0",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
