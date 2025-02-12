@@ -8,6 +8,7 @@ function Player() {
         id: string;
         elapsed: number;
         duration: number;
+        isTrackChange?: boolean;
     } | null>(null);
     const [elapsed, setElapsed] = useState(0);
 
@@ -58,6 +59,8 @@ function Player() {
         return () => clearTimeout(timer);
     }, []);
 
+
+
     return (
         <div className={styles.audioPlayer}>
             {currentTrack && (
@@ -66,7 +69,6 @@ function Player() {
                     playList={playList}
                     audioInitialState={{
                         muted: false,
-                        volume: 0.1,
                         curPlayId: currentTrack.id,
                     }}
                     placement={{
@@ -75,8 +77,12 @@ function Player() {
                     activeUI={{
                         all: true,
                         progress: "waveform",
+                        playlist: false,
+                        repeatType: false,
+                        prevNnext: false,
+
                     }}
-                    rootContainerProps={{ width: "40%", marginTop: "10px" }}
+                    rootContainerProps={{ width: "40%" }}
                 />
             )}
         </div>
