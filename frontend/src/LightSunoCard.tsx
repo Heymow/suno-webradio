@@ -53,20 +53,19 @@ export default function RecipeReviewCard(props: SunoSong): JSX.Element {
                     </Typography>}
 
                     subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
-                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {props.upVoteCount}</div>}>
+                        <Chip sx={{ height: '20px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '14px' }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '14px' }} /> {props.upVoteCount}</div>}>
                         </Chip>
                     </Typography>}
 
                 />
                 <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column" }}>
+                    <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column' }}>
                         Style of Music : {prompt}
-                        {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
-                        <Chip label={props.modelVersion} size="small" sx={{ width: "auto", maxWidth: "fit-content", marginTop: "15px" }}></Chip>
-
-                    </Typography>
+                        {negativePrompt && <Typography sx={{ paddingTop: '5px' }}>Exclude Styles : {negativePrompt}</Typography>}
+                        <Chip label={modelVersion} size="small" sx={{ width: "auto", maxWidth: "fit-content", marginTop: "15px" }} />
+                    </Box>
                 </CardContent>
             </Card>
 

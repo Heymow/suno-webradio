@@ -1,8 +1,9 @@
 interface SunoSong {
+    id: string;
     name: string;
     author: string;
     prompt: string;
-    negative: string;
+    negative?: string;
     lyrics?: string;
     songImage: string;
     avatarImage: string;
@@ -10,6 +11,11 @@ interface SunoSong {
     upVoteCount: number;
     modelVersion: string;
     audio: string;
+    duration: string;
+    radioVoteCount?: number;
+    radioPlayCount?: number;
+    sunoLink?: string;
+    userId?: string;
 }
 
 interface Playlist {
@@ -18,4 +24,4 @@ interface Playlist {
     img: string;
     src: string;
     id: number;
-}
+} 

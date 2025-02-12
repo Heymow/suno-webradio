@@ -11,8 +11,9 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+
 // Custom hook for typing effect
-const useTypingEffect = (fullText: string, speed = 10) => {
+const useTypingEffect = (fullText: string | undefined, speed = 10) => {
     const [displayedText, setDisplayedText] = React.useState<string | null>(null);
 
     React.useEffect(() => {
@@ -94,22 +95,21 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
 
                     subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
                         <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {props.upVoteCount}</div>}>
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '16px' }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '16px' }} /> {props.upVoteCount}</div>}>
                         </Chip>
                     </Typography>}
 
                 />
                 <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column", }}>
+                    <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column' }}>
                         Style of Music : {prompt}
-                        {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
-                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", }}></Chip>
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}><button className={styles.likeButton}>Vote</button></div>
-
-                    </Typography>
-
-
+                        {negativePrompt && <Typography sx={{ paddingTop: '5px' }}>Exclude Styles : {negativePrompt}</Typography>}
+                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px" }} />
+                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            <button className={styles.likeButton}>Vote</button>
+                        </Box>
+                    </Box>
                 </CardContent>
 
 

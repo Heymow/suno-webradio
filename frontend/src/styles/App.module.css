@@ -9,7 +9,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 
 .header {
@@ -36,10 +35,11 @@
 }
 
 .content {
+  margin-top: 80px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh;
+  min-height: calc(100vh - 80px);
   width: 100%;
   flex-direction: column;
 }
@@ -56,10 +56,19 @@
   border-radius: 10px;
   font-size: 16px;
   font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #1f1ba0;
 }
 
 .topRightButtonsContainer {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+
 }
 
 .topRightButtons {
@@ -71,6 +80,11 @@
   border-radius: 10px;
   font-size: 16px;
   font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.topRightButtons:hover {
+  background-color: #1f1ba0;
 }
 
 .footer {
@@ -127,7 +141,12 @@
   width: 50px;
   height: 50px;
   font-weight: 500;
-  font-size: x-large
+  font-size: x-large;
+  transition: background-color 0.2s ease;
+}
+
+.plusButton:hover {
+  background-color: #1f1ba0;
 }
 
 .explanatorytext {
@@ -190,15 +209,6 @@
   display: flex;
 }
 
-.content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 75vh;
-  width: 100%;
-  flex-direction: column;
-}
-
 .directButton {
   z-index: 2;
   height: 60px;
@@ -218,6 +228,11 @@
   animation: pulse 2s infinite;
 }
 
+.accountCircle {
+  margin-right: 30px;
+
+
+}
 
 .clickBlocker {
   position: fixed;
@@ -249,4 +264,17 @@
   100% {
     box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.6), 0 0 30px rgba(64, 196, 255, 0.4);
   }
+}
+
+.userContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 20px;
+}
+
+.username {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
 }
