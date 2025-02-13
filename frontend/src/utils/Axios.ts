@@ -10,8 +10,23 @@ const Axios = axios.create({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    withCredentials: true // Pour envoyer les cookies avec les requêtes
+    withCredentials: true
 });
+
+// File d'attente pour les requêtes en attente de refresh token
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
+    failedQueue = [];
+};
 
 // Intercepteur de requêtes : ajoute le token d'accès aux headers s'il est présent
 Axios.interceptors.request.use(
@@ -30,16 +45,40 @@ Axios.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then(token => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        return Axios(originalRequest);
+                    })
+                    .catch(err => Promise.reject(err));
+            }
+
             originalRequest._retry = true;
-            const refreshResponse = await refreshAccessToken();
-            if (refreshResponse && refreshResponse.token) {
-                store.dispatch(setCredentials({
-                    token: refreshResponse.token,
-                    username: refreshResponse.user.username
-                }));
-                originalRequest.headers.Authorization = `Bearer ${refreshResponse.token}`;
-                return Axios(originalRequest);
+            isRefreshing = true;
+
+            try {
+                const response = await refreshAccessToken();
+                if (response && response.token) {
+                    store.dispatch(setCredentials({
+                        token: response.token,
+                        username: response.user.username,
+                        avatar: response.user.avatar
+                    }));
+
+                    Axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
+                    processQueue(null, response.token);
+                    return Axios(originalRequest);
+                }
+            } catch (refreshError) {
+                processQueue(refreshError, null);
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
         return Promise.reject(error);

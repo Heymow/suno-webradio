@@ -2,14 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import AudioPlayer from "react-modern-audio-player";
 import styles from "./styles/AudioPlayer.module.css";
 
-function Player() {
+interface PlayerProps {
+    currentTrack: any;
+}
+
+function Player({ currentTrack }: PlayerProps) {
     const [playList, setPlayList] = useState<any[]>([]);
-    const [currentTrack, setCurrentTrack] = useState<{
-        id: string;
-        elapsed: number;
-        duration: number;
-        isTrackChange?: boolean;
-    } | null>(null);
     const [elapsed, setElapsed] = useState(0);
 
     // Garder la dernière valeur de elapsed en ref pour le listener
@@ -18,20 +16,23 @@ function Player() {
         elapsedRef.current = elapsed;
     }, [elapsed]);
 
-    // Connexion SSE unique
+    // Mettre à jour la playlist quand currentTrack change
     useEffect(() => {
-        const eventSource = new EventSource("http://localhost:3000/player/connection");
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setCurrentTrack(data);
+        if (currentTrack) {
+            const formattedTrack = {
+                id: currentTrack.id,
+                name: currentTrack.name,
+                src: currentTrack.audio,
+                img: currentTrack.songImage
+            };
+
             setPlayList((prev) => {
-                const exists = prev.some((track) => track.id === data.id);
-                return exists ? prev : [...prev, data];
+                const exists = prev.some((track) => track.id === formattedTrack.id);
+                return exists ? prev : [formattedTrack];
             });
-            setElapsed(data.elapsed);
-        };
-        return () => eventSource.close();
-    }, []);
+            setElapsed(currentTrack.elapsed || 0);
+        }
+    }, [currentTrack]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -41,7 +42,6 @@ function Player() {
                     try {
                         const res = await fetch("http://localhost:3000/player/status");
                         const data = await res.json();
-                        setCurrentTrack(data);
                         setElapsed(data.elapsed);
                         audioEl.currentTime = data.elapsed;
                     } catch (error) {
@@ -59,11 +59,9 @@ function Player() {
         return () => clearTimeout(timer);
     }, []);
 
-
-
     return (
         <div className={styles.audioPlayer}>
-            {currentTrack && (
+            {currentTrack && playList.length > 0 && (
                 <AudioPlayer
                     className={styles.audioPlayer}
                     playList={playList}
@@ -80,7 +78,6 @@ function Player() {
                         playlist: false,
                         repeatType: false,
                         prevNnext: false,
-
                     }}
                     rootContainerProps={{ width: "40%" }}
                 />

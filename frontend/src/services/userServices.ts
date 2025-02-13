@@ -23,12 +23,10 @@ export const loginUser = async (loginData: { email: string; password: string; })
 
 export const refreshAccessToken = async () => {
     try {
-        const response = await Axios.post('/users/refresh', {
-            withCredentials: true
-        });
+        const response = await Axios.post('/users/refresh-token');
         return response.data;
     } catch (error: any) {
         console.error('Error in refreshAccessToken:', error.response?.data || error.message);
-        return null;
+        throw error;
     }
 }; 

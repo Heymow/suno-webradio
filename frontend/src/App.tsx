@@ -1,17 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AudioPlayer from "./AudioPlayer";
 import LightSunoCard from "./LightSunoCard";
 import styles from "./styles/App.module.css";
 import SunoProjectCard from "./SunoProjectCard";
-import { getSunoSong, submitSunoLink } from "./services/sunoServices";
+import { submitSunoLink } from "./services/sunoServices";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Icon from '@mui/material/Icon';
 import AuthModal from "./AuthModal";
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, logout } from './store/authStore';
-import { SnackbarProvider, useSnackbar } from 'notistack';
+import { useSnackbar } from 'notistack';
 import Avatar from '@mui/material/Avatar';
+import Axios from './utils/Axios';
+
+// Constants
+const ERROR_MESSAGES = {
+  INVALID_LINK: 'Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...',
+  LOGIN_REQUIRED: 'Veuillez vous connecter pour soumettre une musique',
+  EMPTY_LINK: 'Veuillez entrer un lien Suno',
+  SESSION_EXPIRED: 'Session expirée, reconnexion...'
+};
+
+const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
+const SSE_URL = "http://localhost:3000/player/connection";
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
+
+// Utility functions
+const convertToSunoSong = (data: any): SunoSong => ({
+  id: data.id,
+  name: data.name,
+  author: data.writer,
+  songImage: data.img,
+  duration: data.duration.toString(),
+  audio: data.src,
+  prompt: data.prompt || "",
+  negative: data.negative || "",
+  avatarImage: data.avatarImage || "",
+  playCount: data.playCount || 0,
+  upVoteCount: data.upVoteCount || 0,
+  modelVersion: data.modelVersion || "",
+  lyrics: data.lyrics || ""
+});
 
 function AppContent() {
   const [currentTrack, setCurrentTrack] = useState<SunoSong | null>(null);
@@ -26,91 +57,126 @@ function AppContent() {
   const username = useAppSelector(selectCurrentUser);
   const userAvatar = useAppSelector(selectCurrentAvatar);
 
-  // Connexion SSE pour les mises à jour du player
+  // Refs pour éviter les dépendances cycliques
+  const currentTrackRef = useRef(currentTrack);
+  const snackBarRef = useRef(snackBar);
+
   useEffect(() => {
-    const eventSource = new EventSource("http://localhost:3000/player/connection");
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    currentTrackRef.current = currentTrack;
+    snackBarRef.current = snackBar;
+  }, [currentTrack, snackBar]);
 
-      // Conversion des données du player en format SunoSong
-      const trackData: SunoSong = {
-        id: data.id,
-        name: data.name,
-        author: data.writer,
-        songImage: data.img,
-        duration: data.duration.toString(),
-        audio: data.src,
-        prompt: data.prompt || "",
-        negative: data.negative || "",
-        avatarImage: data.avatarImage || "",
-        playCount: data.playCount || 0,
-        upVoteCount: data.upVoteCount || 0,
-        modelVersion: data.modelVersion || "",
-        lyrics: data.lyrics || ""
-      };
+  // SSE Connection
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let isConnecting = false;
+    let isMounted = true;
+    let localReconnectAttempts = 0;
 
-      setCurrentTrack(trackData);
+    const handleTrackUpdate = (data: any) => {
+      if (!data || !isMounted) return;
+      const sunoSong = convertToSunoSong(data);
+      setCurrentTrack(sunoSong);
 
-      // Gérer la piste précédente
       if (data.previousTrack) {
-        const previousTrackData: SunoSong = {
-          id: data.previousTrack.id,
-          name: data.previousTrack.name,
-          author: data.previousTrack.writer,
-          songImage: data.previousTrack.img,
-          duration: data.previousTrack.duration.toString(),
-          audio: data.previousTrack.src,
-          prompt: data.previousTrack.prompt || "",
-          negative: data.previousTrack.negative || "",
-          avatarImage: data.previousTrack.avatarImage || "",
-          playCount: data.previousTrack.playCount || 0,
-          upVoteCount: data.previousTrack.upVoteCount || 0,
-          modelVersion: data.previousTrack.modelVersion || "",
-          lyrics: data.previousTrack.lyrics || ""
-        };
-        setPreviousTrack(previousTrackData);
-      } else if (data.isTrackChange && currentTrack) {
-        setPreviousTrack(currentTrack);
+        setPreviousTrack(convertToSunoSong(data.previousTrack));
+      } else if (data.isTrackChange && currentTrackRef.current) {
+        setPreviousTrack(currentTrackRef.current);
+      }
+
+      if (data.nextTrack) {
+        setNextTrack(convertToSunoSong(data.nextTrack));
+      } else if (data.isTrackChange) {
+        fetchNextTrack();
       }
     };
 
-    return () => eventSource.close();
-  }, [currentTrack]);
-
-  // Récupérer la prochaine piste
-  useEffect(() => {
     const fetchNextTrack = async () => {
       try {
-        const response = await fetch("http://localhost:3000/player/next-track-info");
-        const data = await response.json();
-        if (data.track) {
-          const nextTrackData: SunoSong = {
-            id: data.track.id,
-            name: data.track.name,
-            author: data.track.writer,
-            songImage: data.track.img,
-            duration: data.track.duration.toString(),
-            audio: data.track.src,
-            prompt: data.track.prompt || "",
-            negative: data.track.negative || "",
-            avatarImage: data.track.avatarImage || "",
-            playCount: data.track.playCount || 0,
-            upVoteCount: data.track.upVoteCount || 0,
-            modelVersion: data.track.modelVersion || "",
-            lyrics: data.track.lyrics || ""
-          };
-          setNextTrack(nextTrackData);
+        const { data } = await Axios.get("/player/next-track-info");
+        if (data.track && isMounted) {
+          setNextTrack(convertToSunoSong(data.track));
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erreur lors de la récupération de la prochaine piste:", error);
+        if (error.response?.status === 401) {
+          snackBarRef.current(ERROR_MESSAGES.SESSION_EXPIRED, { variant: 'warning' });
+        }
       }
     };
 
-    fetchNextTrack();
-  }, [currentTrack]);
+    const connectSSE = async () => {
+      if (isConnecting || !isMounted) return;
+      isConnecting = true;
+
+      if (eventSource) {
+        eventSource.close();
+      }
+
+      try {
+        eventSource = new EventSource(SSE_URL, { withCredentials: true });
+
+        eventSource.onopen = () => {
+          if (!isMounted) return;
+          console.log('SSE Connection established');
+          localReconnectAttempts = 0;
+          isConnecting = false;
+        };
+
+        eventSource.onmessage = (event) => {
+          if (!isMounted) return;
+          try {
+            const data = JSON.parse(event.data);
+            handleTrackUpdate(data);
+          } catch (error) {
+            console.error('Erreur lors du parsing des données SSE:', error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          if (!isMounted) return;
+          console.error('SSE Connection error:', error);
+          if (eventSource) {
+            eventSource.close();
+          }
+
+          isConnecting = false;
+
+          if (localReconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            if (reconnectTimeout) {
+              clearTimeout(reconnectTimeout);
+            }
+            reconnectTimeout = setTimeout(() => {
+              if (!isMounted) return;
+              localReconnectAttempts++;
+              connectSSE();
+            }, RECONNECT_DELAY * Math.pow(2, localReconnectAttempts));
+          } else {
+            snackBarRef.current('Impossible de se connecter au serveur', { variant: 'error' });
+          }
+        };
+      } catch (error) {
+        console.error('Error creating EventSource:', error);
+        isConnecting = false;
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      isMounted = false;
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+    };
+  }, []);
 
   const validateSunoLink = (link: string): boolean => {
-    return !!(link.match(/suno\.ai\/song\/([a-f0-9-]+)/i) || link.match(/suno\.com\/song\/([a-f0-9-]+)/i));
+    return !!link.match(SUNO_LINK_REGEX);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +184,7 @@ function AppContent() {
     setSunoLink(newLink);
 
     if (newLink && !validateSunoLink(newLink)) {
-      snackBar('Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...', {
+      snackBarRef.current(ERROR_MESSAGES.INVALID_LINK, {
         variant: 'error',
         preventDuplicate: true
       });
@@ -127,18 +193,18 @@ function AppContent() {
 
   const handleSubmitSong = async () => {
     if (!username) {
-      snackBar('Veuillez vous connecter pour soumettre une musique', { variant: 'warning' });
-      openLoginModal();
+      snackBarRef.current(ERROR_MESSAGES.LOGIN_REQUIRED, { variant: 'warning' });
+      setLoginModalOpen(true);
       return;
     }
 
     if (!sunoLink) {
-      snackBar('Veuillez entrer un lien Suno', { variant: 'warning' });
+      snackBarRef.current(ERROR_MESSAGES.EMPTY_LINK, { variant: 'warning' });
       return;
     }
 
     if (!validateSunoLink(sunoLink)) {
-      snackBar('Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...', { variant: 'error' });
+      snackBarRef.current(ERROR_MESSAGES.INVALID_LINK, { variant: 'error' });
       return;
     }
 
@@ -148,9 +214,9 @@ function AppContent() {
     try {
       await submitSunoLink(sunoLink);
       setSunoLink("");
-      snackBar('Musique ajoutée avec succès !', { variant: 'success' });
+      snackBarRef.current('Musique ajoutée avec succès !', { variant: 'success' });
     } catch (error: any) {
-      snackBar(
+      snackBarRef.current(
         error.response?.data?.message || 'Erreur lors de l\'ajout de la musique',
         { variant: 'error' }
       );
@@ -159,17 +225,9 @@ function AppContent() {
     }
   };
 
-  const openLoginModal = () => {
-    setLoginModalOpen(true);
-  };
-
-  const closeLoginModal = () => {
-    setLoginModalOpen(false);
-  };
-
   const handleLogout = () => {
     dispatch(logout());
-    snackBar('Déconnexion réussie', { variant: 'info' });
+    snackBarRef.current('Déconnexion réussie', { variant: 'info' });
   };
 
   return (
@@ -179,7 +237,7 @@ function AppContent() {
         <button className={styles.button}>Hits</button>
         <button className={styles.button}>New</button>
         <div className={styles.audioPlayer}>
-          <AudioPlayer />
+          <AudioPlayer currentTrack={currentTrack} />
           <div className={styles.clickBlocker}></div>
         </div>
         <div className={styles.topRightButtonsContainer}>
@@ -224,13 +282,13 @@ function AppContent() {
                   backgroundColor: 'transparent',
                   borderRadius: '50%',
                   padding: '5px',
-                  color: 'white',
+
                   '&:hover': {
                     backgroundColor: 'rgba(255,255,255,0.1)'
                   }
                 }}
                 component={AccountCircleIcon}
-                onClick={openLoginModal}
+                onClick={() => setLoginModalOpen(true)}
               />
             )}
           </div>
@@ -275,7 +333,10 @@ function AppContent() {
         <div className={styles.explanatorytext}>Explanatory text</div>
       </footer>
 
-      <AuthModal open={loginModalOpen} onClose={closeLoginModal} />
+      <AuthModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
     </div>
   );
 }
