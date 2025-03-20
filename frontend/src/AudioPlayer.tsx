@@ -8,63 +8,12 @@ interface PlayerProps {
 
 function Player({ currentTrack }: PlayerProps) {
     const [playList, setPlayList] = useState<any[]>([]);
-    const [elapsed, setElapsed] = useState(0);
     const [isAudioReady, setIsAudioReady] = useState(false);
     const [audioError, setAudioError] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
-    // Refs pour accéder aux éléments et valeurs entre les rendus
+    // Référence vers l'élément audio
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
-    const audioTestRef = useRef<HTMLAudioElement | null>(null);
-
-    // Précharger et vérifier l'audio avant de le jouer
-    const preloadAudio = (audioUrl: string): Promise<void> => {
-        return new Promise((resolve, reject) => {
-            if (audioTestRef.current) {
-                audioTestRef.current.src = '';
-            }
-
-            const audioTest = new Audio();
-            audioTestRef.current = audioTest;
-
-            const handleCanPlay = () => {
-                console.log("Audio préchargé avec succès:", audioUrl);
-                audioTest.removeEventListener('canplaythrough', handleCanPlay);
-                audioTest.removeEventListener('error', handleError);
-                resolve();
-            };
-
-            const handleError = (e: any) => {
-                console.error("Erreur lors du préchargement:", e);
-                audioTest.removeEventListener('canplaythrough', handleCanPlay);
-                audioTest.removeEventListener('error', handleError);
-                reject(new Error("Impossible de charger l'audio"));
-            };
-
-            audioTest.addEventListener('canplaythrough', handleCanPlay);
-            audioTest.addEventListener('error', handleError);
-            audioTest.src = audioUrl;
-        });
-    };
-
-    // Synchronisation avec le serveur
-    const syncWithServer = async (audioEl: HTMLAudioElement | null = null) => {
-        try {
-            const res = await fetch("http://localhost:3000/player/status");
-            const data = await res.json();
-            setElapsed(data.elapsed);
-
-            if (audioEl) {
-                const timeDiff = Math.abs((audioEl.currentTime || 0) - data.elapsed);
-                if (timeDiff > 3) { // Seulement ajuster si différence > 3 secondes
-                    console.log(`Ajustement: ${audioEl.currentTime} -> ${data.elapsed}`);
-                    audioEl.currentTime = data.elapsed;
-                }
-            }
-        } catch (error) {
-            console.error("Erreur de synchronisation:", error);
-        }
-    };
 
     // Traitement de la piste reçue
     useEffect(() => {
@@ -74,7 +23,6 @@ function Player({ currentTrack }: PlayerProps) {
         }
 
         if (!currentTrack.audio) {
-            console.error("URL audio manquante:", currentTrack);
             setAudioError("URL audio manquante");
             return;
         }
@@ -82,13 +30,11 @@ function Player({ currentTrack }: PlayerProps) {
         try {
             new URL(currentTrack.audio);
         } catch (e) {
-            console.error("URL audio invalide:", currentTrack.audio);
             setAudioError("URL audio invalide");
             return;
         }
 
-        console.log("Traitement nouvelle piste:", currentTrack.id);
-
+        // Créer l'entrée pour la playlist
         const formattedTrack = {
             id: currentTrack.id || Date.now().toString(),
             name: currentTrack.name || "Sans titre",
@@ -96,73 +42,95 @@ function Player({ currentTrack }: PlayerProps) {
             img: currentTrack.songImage || ""
         };
 
-        // Précharger l'audio pour vérifier qu'il est accessible
-        preloadAudio(formattedTrack.src)
-            .then(() => {
-                setPlayList([formattedTrack]);
-                setElapsed(currentTrack.elapsed || 0);
-                setIsAudioReady(true);
-                setAudioError(null);
-            })
-            .catch(() => {
-                setAudioError("Impossible de charger l'audio");
-                setIsAudioReady(false);
-            });
+        // Mettre à jour la playlist
+        setPlayList([formattedTrack]);
+        setIsAudioReady(true);
+        setAudioError(null);
     }, [currentTrack]);
 
     // Configuration du lecteur audio et synchronisation
     useEffect(() => {
         if (!isAudioReady) return;
 
-        // Configuration de l'élément audio après montage du composant
+        let isMounted = true;
+        let syncInterval: ReturnType<typeof setInterval>;
+
+        // Configuration après le montage du composant
         const setupAudio = () => {
             const audioElement = document.querySelector("audio");
-            if (!audioElement) return;
+            if (!audioElement || !isMounted) return;
 
             audioElementRef.current = audioElement;
-            audioElement.currentTime = elapsed;
 
-            // Synchronisation lors du play
+            // Définir le temps initial
+            if (currentTrack?.elapsed) {
+                audioElement.currentTime = currentTrack.elapsed;
+            }
+
+            // Gestionnaires d'événements
             const handlePlay = () => {
-                console.log("Play - synchronisation");
+                if (!isMounted) return;
                 setIsPlaying(true);
-                syncWithServer(audioElement);
+                // Synchroniser avec le serveur au démarrage de la lecture
+                syncWithServer();
             };
 
             const handlePause = () => {
+                if (!isMounted) return;
                 setIsPlaying(false);
             };
 
+            const handleError = () => {
+                if (!isMounted) return;
+                setAudioError("Impossible de lire l'audio");
+            };
+
+            // Ajout des écouteurs d'événements
             audioElement.addEventListener("play", handlePlay);
             audioElement.addEventListener("pause", handlePause);
+            audioElement.addEventListener("error", handleError);
 
-            // Synchronisation périodique
-            const syncInterval = setInterval(() => {
-                if (!audioElement.paused) {
-                    syncWithServer(audioElement);
-                }
-            }, 30000);
+            // Synchronisation périodique simple (toutes les 15 secondes)
+            syncInterval = setInterval(() => {
+                if (audioElement.paused || !isMounted) return;
+                syncWithServer();
+            }, 15000);
 
             return () => {
                 audioElement.removeEventListener("play", handlePlay);
                 audioElement.removeEventListener("pause", handlePause);
+                audioElement.removeEventListener("error", handleError);
                 clearInterval(syncInterval);
             };
         };
 
-        const timerId = setTimeout(setupAudio, 300);
-        return () => clearTimeout(timerId);
-    }, [isAudioReady, elapsed]);
+        // Synchronisation avec le serveur
+        const syncWithServer = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/player/status");
+                const data = await res.json();
 
-    // Nettoyage à la destruction du composant
-    useEffect(() => {
-        return () => {
-            if (audioTestRef.current) {
-                audioTestRef.current.src = '';
-                audioTestRef.current = null;
+                if (!audioElementRef.current || typeof data.elapsed !== 'number') return;
+
+                // Si le décalage est significatif (> 3 secondes), ajuster le temps
+                const timeDiff = Math.abs(audioElementRef.current.currentTime - data.elapsed);
+                if (timeDiff > 3) {
+                    audioElementRef.current.currentTime = data.elapsed;
+                }
+            } catch (error) {
+                console.error("Erreur de synchronisation:", error);
             }
         };
-    }, []);
+
+        // Démarrer la configuration après un court délai
+        const timerId = setTimeout(setupAudio, 300);
+
+        return () => {
+            isMounted = false;
+            clearTimeout(timerId);
+            clearInterval(syncInterval);
+        };
+    }, [isAudioReady, currentTrack]);
 
     return (
         <div className={styles.audioPlayer}>
