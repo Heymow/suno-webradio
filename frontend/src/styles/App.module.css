@@ -133,6 +133,8 @@
   height: 10%;
   max-height: 10%;
   background-color: #2e2e2ed2;
+  font-size: 1vw;
+  font-size: calc(40% + 0.3vw + 0.3vh);
 }
 
 .previousNextSong {

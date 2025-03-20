@@ -27,47 +27,43 @@ export default function RecipeReviewCard(props: SunoSong): JSX.Element {
 
     return (
         <Box sx={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginInline: 'auto',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            borderRadius: '5px',
-            maxHeight: '60vh',
-            marginTop: '4vh',
+            // display: 'flex',
+            // alignItems: 'flex-start',
+            // marginInline: 'auto',
+            // backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            // borderRadius: '5px',
+            // maxHeight: '60vh',
+            // marginTop: '4vh',
 
         }}>
-            <Card sx={{ maxWidth: 345, maxHeight: '60vh', minWidth: '15vw', borderRadius: '5px', }}>
+            <Card sx={{ maxWidth: 345, maxHeight: '8vh', minWidth: '15vw', borderRadius: '5px' }}>
                 <CardHeader
                     className={styles.cardHeader}
-                    sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2 }}
+                    sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2, padding: '5px' }}
                     avatar={
                         <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.avatarImage}>
                         </Avatar>
 
                     }
-                    title={<Typography className={styles.headerCard} variant="h6">{titleText}
-                        <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
+                    title={<Typography className={styles.headerCard} variant="h6" fontSize='100%'>{subheaderText}
+                    </Typography>}
+                    subheader={<Typography className={styles.lightHeaderCard} fontSize='80%'>{titleText.length > 20 ? titleText.slice(0, 50) + "..." : titleText}
+                        {/* <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
                             ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.playCount / 1000) + "K"} </div> :
                             <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.playCount}</div>}>
-                        </Chip>
+                            </Chip> */}
                     </Typography>}
 
-                    subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
-                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px" }} /> {props.upVoteCount}</div>}>
-                        </Chip>
-                    </Typography>}
 
                 />
-                <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
+                {/* <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} style={{ "display": "flex", "flexDirection": "column" }}>
                         Style of Music : {prompt}
                         {negativePrompt && <p style={{ "paddingTop": "5px" }}>Exclude Styles : {negativePrompt}</p >}
                         <Chip label={props.modelVersion} size="small" sx={{ width: "auto", maxWidth: "fit-content", marginTop: "15px" }}></Chip>
 
                     </Typography>
-                </CardContent>
+                </CardContent> */}
             </Card>
 
         </Box>

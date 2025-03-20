@@ -35,6 +35,14 @@
 .headerCard {
     display: flex;
     justify-content: space-between;
+    font-size: smaller;
+}
+
+.lightHeaderCard {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+    transition-duration: 1000ms;
 }
 
 .likeButton {
