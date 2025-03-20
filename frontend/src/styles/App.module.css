@@ -100,6 +100,7 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  padding-top: 10vh;
 }
 
 .playerContainer {
@@ -112,8 +113,8 @@
 }
 
 .inputSunoLinkContainer {
-
-  width: 100vw;
+  transition: all 2s ease;
+  width: 70vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -122,7 +123,8 @@
 
 .inputSunoLink {
   width: 40%;
-  height: 3vh;
+  /* height: 2vh; */
+  min-height: 15px;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #333;
@@ -139,15 +141,19 @@
   cursor: pointer;
   border-radius: 40px;
   font-size: 16px;
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   font-weight: 500;
   font-size: x-large;
   transition: background-color 0.2s ease;
+  padding: 0;
+  padding-bottom: 4px;
+  padding-right: 2px;
 }
 
 .plusButton:hover {
-  background-color: #1f1ba0;
+  background-color: #edecf6;
+  color: black;
 }
 
 .explanatorytext {
@@ -172,17 +178,24 @@
   font-size: calc(40% + 0.3vw + 0.3vh);
 }
 
+/* Masquer la div pour les écrans dont la largeur est inférieure ou égale à 600px */
+@media screen and (max-height: 600px) {
+  .previousAndNextSongsContainer {
+    display: none;
+  }
+}
+
 .previousNextSong {
   font-weight: 500;
 }
 
 .previousSongText {
-  font-size: 15px;
+  /* font-size: 1vw+0.1vh; */
   font-weight: 500;
   background-color: #1e1e1ed2;
   border-radius: 10px;
   width: 15%;
-  height: 50%;
+  height: 40%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,13 +206,13 @@
 }
 
 .nextSongText {
-  font-size: 15px;
+  /* font-size: 15px; */
   font-weight: 500;
   background-color: #1e1e1ed2;
   border-radius: 10px;
   width: 15%;
   /* margin-top: 11%; */
-  height: 50%;
+  height: 40%;
   display: flex;
   align-items: center;
   justify-content: center;

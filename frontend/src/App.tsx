@@ -78,6 +78,7 @@ function AppContent() {
   const [sunoLink, setSunoLink] = useState<string>("");
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
   const { enqueueSnackbar: snackBar } = useSnackbar();
 
   const dispatch = useAppDispatch();
@@ -264,6 +265,26 @@ function AppContent() {
     snackBarRef.current('Déconnexion réussie', { variant: 'info' });
   };
 
+  let sunoLinkContainer = clickedPlusButton ? (
+    <div className={styles.inputSunoLinkContainer}>
+      <p style={{ fontWeight: 500 }}>Submit :</p>
+      <input
+        placeholder="Paste your Suno song link here..."
+        className={styles.inputSunoLink}
+        onChange={handleInputChange}
+        value={sunoLink}
+      />
+      <button
+        className={styles.plusButton}
+        onClick={handleSubmitSong}
+        disabled={isSubmitting}
+      > + </button>
+    </div>) : <button
+      className={styles.plusButton}
+      onClick={handleSubmitSong}
+      disabled={isSubmitting}
+    > + </button>;
+
   return (
     <div className={styles.wrapper}>
       <header className={styles.header}>
@@ -350,20 +371,7 @@ function AppContent() {
       </div>
 
       <footer className={styles.footer}>
-        <div className={styles.inputSunoLinkContainer}>
-          <p style={{ fontWeight: 500 }}>Submit :</p>
-          <input
-            placeholder="Paste your Suno song link here..."
-            className={styles.inputSunoLink}
-            onChange={handleInputChange}
-            value={sunoLink}
-          />
-          <button
-            className={styles.plusButton}
-            onClick={handleSubmitSong}
-            disabled={isSubmitting}
-          > + </button>
-        </div>
+        {sunoLinkContainer}
         <div className={styles.explanatorytext}>Explanatory text</div>
       </footer>
 
