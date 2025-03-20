@@ -3,6 +3,7 @@
     transition: opacity 1.3s ease-in-out;
     user-select: none;
     -webkit-user-drag: none;
+    z-index: 0;
 }
 
 .imageVisible {

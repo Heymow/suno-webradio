@@ -280,9 +280,8 @@ function AppContent() {
         disabled={isSubmitting}
       > + </button>
     </div>) : <button
-      className={styles.plusButton}
-      onClick={handleSubmitSong}
-      disabled={isSubmitting}
+      className={styles.openPlusButton}
+      onClick={() => setClickedPlusButton(true)}
     > + </button>;
 
   return (
@@ -372,7 +371,7 @@ function AppContent() {
 
       <footer className={styles.footer}>
         {sunoLinkContainer}
-        <div className={styles.explanatorytext}>Explanatory text</div>
+        <div className={styles.explanatorytext}>{!clickedPlusButton ? "Submit your song" : "Insert your song link"}</div>
       </footer>
 
       <AuthModal
