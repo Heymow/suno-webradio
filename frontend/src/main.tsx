@@ -1,21 +1,24 @@
-
 import React from 'react'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { store } from './store/authStore'
+import { SnackbarProvider } from 'notistack'
 import App from './App'
+import './index.css'
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  const root = createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-} else {
-  console.error("Root element not found");
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <SnackbarProvider
+        maxSnack={3}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <App />
+      </SnackbarProvider>
+    </Provider>
+  </React.StrictMode>
+)
 
 
 
