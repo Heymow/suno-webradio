@@ -8,11 +8,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { loginUser, createUser } from './services/userServices';
+import { loginUser, createUser } from './services/user.services';
 import { useAppDispatch } from './store/hooks';
 import { setCredentials } from './store/authStore';
 import { useSnackbar } from 'notistack';
-import { processAvatar } from './services/imageService';
+import { processAvatar } from './services/image.service';
 
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const dispatch = useAppDispatch();

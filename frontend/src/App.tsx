@@ -3,7 +3,7 @@ import AudioPlayer from "./AudioPlayer";
 import LightSunoCard from "./LightSunoCard";
 import styles from "./styles/App.module.css";
 import SunoProjectCard from "./SunoProjectCard";
-import { submitSunoLink } from "./services/sunoServices";
+import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Icon from '@mui/material/Icon';
