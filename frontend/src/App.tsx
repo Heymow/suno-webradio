@@ -44,8 +44,6 @@ const isValidAudioUrl = (url: any): boolean => {
 };
 
 const convertToSunoSong = (data: any): SunoSong => {
-  console.log("Données brutes reçues pour conversion:", data);
-
   // Vérifier que data.src existe et est une chaîne valide
   if (!isValidAudioUrl(data.src)) {
     console.error("URL audio (src) manquante ou invalide dans les données reçues:", data);
@@ -67,7 +65,6 @@ const convertToSunoSong = (data: any): SunoSong => {
     lyrics: data.lyrics || ""
   };
 
-  console.log("SunoSong après conversion:", song);
   return song;
 };
 
@@ -104,32 +101,27 @@ function AppContent() {
 
     const handleTrackUpdate = (data: any) => {
       if (!data || !isMounted) return;
-      console.log("handleTrackUpdate - données brutes reçues:", data);
       const sunoSong = convertToSunoSong(data);
-      setCurrentTrack(sunoSong);
+      if (currentTrack?.audio != sunoSong.audio) {
+        setCurrentTrack(sunoSong);
+      }
 
       if (data.previousTrack) {
-        console.log("Données previousTrack reçues:", data.previousTrack);
         setPreviousTrack(convertToSunoSong(data.previousTrack));
       } else if (data.isTrackChange && currentTrackRef.current) {
-        console.log("Utilisation du currentTrack comme previousTrack");
         setPreviousTrack(currentTrackRef.current);
       }
 
       if (data.nextTrack) {
-        console.log("Données nextTrack reçues:", data.nextTrack);
         setNextTrack(convertToSunoSong(data.nextTrack));
       } else if (data.isTrackChange) {
-        console.log("Récupération de la piste suivante depuis l'API");
         fetchNextTrack();
       }
     };
 
     const fetchNextTrack = async () => {
       try {
-        console.log("Appel API pour récupérer la piste suivante");
         const { data } = await Axios.get("/player/next-track-info");
-        console.log("Réponse de l'API next-track-info:", data);
         if (data.track && isMounted) {
           setNextTrack(convertToSunoSong(data.track));
         }
@@ -154,7 +146,6 @@ function AppContent() {
 
         eventSource.onopen = () => {
           if (!isMounted) return;
-          console.log('SSE Connection established');
           localReconnectAttempts = 0;
           isConnecting = false;
         };
