@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import AudioPlayer from "react-modern-audio-player";
 import styles from "./styles/AudioPlayer.module.css";
+import { Height } from "@mui/icons-material";
+import { height } from "@mui/system";
 
 interface PlayerProps {
     currentTrack: any;
@@ -176,6 +178,12 @@ function Player({ currentTrack }: PlayerProps) {
                     }}
                     placement={{
                         player: "top",
+                        volumeSlider: "bottom",
+                        interface: {
+                            templateArea: {
+                                volume: "row1-8 / col1-9",
+                            }
+                        }
                     }}
                     activeUI={{
                         all: true,
