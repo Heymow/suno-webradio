@@ -28,21 +28,48 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
 // Utility functions
-const convertToSunoSong = (data: any): SunoSong => ({
-  id: data.id,
-  name: data.name,
-  author: data.writer,
-  songImage: data.img,
-  duration: data.duration.toString(),
-  audio: data.src,
-  prompt: data.prompt || "",
-  negative: data.negative || "",
-  avatarImage: data.avatarImage || "",
-  playCount: data.playCount || 0,
-  upVoteCount: data.upVoteCount || 0,
-  modelVersion: data.modelVersion || "",
-  lyrics: data.lyrics || ""
-});
+const isValidAudioUrl = (url: any): boolean => {
+  if (!url || typeof url !== 'string' || !url.trim()) {
+    return false;
+  }
+
+  // Vérifier si l'URL a un format valide (commence par http/https)
+  try {
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch (e) {
+    console.error("URL audio invalide:", url, e);
+    return false;
+  }
+};
+
+const convertToSunoSong = (data: any): SunoSong => {
+  console.log("Données brutes reçues pour conversion:", data);
+
+  // Vérifier que data.src existe et est une chaîne valide
+  if (!isValidAudioUrl(data.src)) {
+    console.error("URL audio (src) manquante ou invalide dans les données reçues:", data);
+  }
+
+  const song = {
+    id: data.id,
+    name: data.name,
+    author: data.writer,
+    songImage: data.img,
+    duration: data.duration ? data.duration.toString() : "0",
+    audio: data.src || "",  // Assigner une chaîne vide si src est undefined
+    prompt: data.prompt || "",
+    negative: data.negative || "",
+    avatarImage: data.avatarImage || "",
+    playCount: data.playCount || 0,
+    upVoteCount: data.upVoteCount || 0,
+    modelVersion: data.modelVersion || "",
+    lyrics: data.lyrics || ""
+  };
+
+  console.log("SunoSong après conversion:", song);
+  return song;
+};
 
 function AppContent() {
   const [currentTrack, setCurrentTrack] = useState<SunoSong | null>(null);
@@ -77,25 +104,32 @@ function AppContent() {
 
     const handleTrackUpdate = (data: any) => {
       if (!data || !isMounted) return;
+      console.log("handleTrackUpdate - données brutes reçues:", data);
       const sunoSong = convertToSunoSong(data);
       setCurrentTrack(sunoSong);
 
       if (data.previousTrack) {
+        console.log("Données previousTrack reçues:", data.previousTrack);
         setPreviousTrack(convertToSunoSong(data.previousTrack));
       } else if (data.isTrackChange && currentTrackRef.current) {
+        console.log("Utilisation du currentTrack comme previousTrack");
         setPreviousTrack(currentTrackRef.current);
       }
 
       if (data.nextTrack) {
+        console.log("Données nextTrack reçues:", data.nextTrack);
         setNextTrack(convertToSunoSong(data.nextTrack));
       } else if (data.isTrackChange) {
+        console.log("Récupération de la piste suivante depuis l'API");
         fetchNextTrack();
       }
     };
 
     const fetchNextTrack = async () => {
       try {
+        console.log("Appel API pour récupérer la piste suivante");
         const { data } = await Axios.get("/player/next-track-info");
+        console.log("Réponse de l'API next-track-info:", data);
         if (data.track && isMounted) {
           setNextTrack(convertToSunoSong(data.track));
         }
