@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import AudioPlayer from "react-modern-audio-player";
 import styles from "./styles/AudioPlayer.module.css";
 import { Height } from "@mui/icons-material";
-import { height } from "@mui/system";
+import { height, maxHeight, maxWidth } from "@mui/system";
 
 interface PlayerProps {
     currentTrack: any;
@@ -160,7 +160,7 @@ function Player({ currentTrack }: PlayerProps) {
                         repeatType: false,
                         prevNnext: false,
                     }}
-                    rootContainerProps={{ width: "40%" }}
+                    rootContainerProps={{ width: "40vw" }}
                 />
             ) : (
                 <div className={styles.audioPlayerLoading}>
