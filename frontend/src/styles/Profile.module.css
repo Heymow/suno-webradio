@@ -1,0 +1,111 @@
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 0;
+    background: linear-gradient(180deg, rgba(37, 29, 185, 0.1) 0%, rgba(37, 29, 185, 0) 100%);
+    position: relative;
+}
+
+.backButton {
+    position: absolute !important;
+    left: 5px;
+    top: 10px;
+    color: white;
+}
+
+.listItemButton {
+    margin: 4px auto !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 85%;
+    justify-content: center;
+}
+
+.listItemButton:hover {
+    background-color: rgba(37, 29, 185, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+.activateButton {
+    margin: 16px auto !important;
+    display: flex;
+    background: linear-gradient(90deg, #251db9 0%, #3b30d1 100%) !important;
+    color: white !important;
+    border-radius: 8px;
+    text-transform: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    width: 80%;
+    box-shadow: 0 4px 10px rgba(37, 29, 185, 0.3);
+    transition: all 0.3s ease;
+}
+
+.activateButton:hover {
+    background: linear-gradient(90deg, #3023ae 0%, #4338e0 100%) !important;
+    box-shadow: 0 6px 12px rgba(37, 29, 185, 0.4);
+    transform: translateY(-2px);
+}
+
+.contentWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.logoutButton {
+    margin: 8px auto !important;
+    border-radius: 8px;
+    color: #f44336;
+    transition: all 0.2s ease;
+    padding: 2px 10px;
+    height: 36px;
+    width: 80%;
+    justify-content: center;
+}
+
+.logoutButton:hover {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+.iconColor {
+    color: #6c63ff;
+}
+
+.logoutIconColor {
+    color: #f44336;
+}
+
+.divider {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.avatar {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 16px;
+    border: 3px solid #251db9;
+    box-shadow: 0 0 20px rgba(37, 29, 185, 0.6);
+}
+
+.profileName {
+    font-weight: bold;
+}
+
+.profileDrawer {
+    width: 400px;
+    background-color: #080821;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.logoutContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bottomSpacer {
+    margin-bottom: 24px;
+}

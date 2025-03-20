@@ -3,13 +3,13 @@ import AudioPlayer from "./AudioPlayer";
 import LightSunoCard from "./LightSunoCard";
 import styles from "./styles/App.module.css";
 import SunoProjectCard from "./SunoProjectCard";
-import { submitSunoLink } from "./services/sunoServices";
+import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
 import Icon from '@mui/material/Icon';
 import AuthModal from "./AuthModal";
+import Profile from "./components/profile";
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { selectCurrentUser, selectCurrentAvatar, logout } from './store/authStore';
+import { selectCurrentUser, selectCurrentAvatar } from './store/authStore';
 import { useSnackbar } from 'notistack';
 import Avatar from '@mui/material/Avatar';
 import Axios from './utils/Axios';
@@ -74,6 +74,7 @@ function AppContent() {
   const [nextTrack, setNextTrack] = useState<SunoSong | null>(null);
   const [sunoLink, setSunoLink] = useState<string>("");
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
+  const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
   const { enqueueSnackbar: snackBar } = useSnackbar();
@@ -251,9 +252,13 @@ function AppContent() {
     }
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    snackBarRef.current('Déconnexion réussie', { variant: 'info' });
+
+  const handleProfileOpen = () => {
+    setProfileOpen(true);
+  };
+
+  const handleProfileClose = () => {
+    setProfileOpen(false);
   };
 
   let sunoLinkContainer = clickedPlusButton ? (
@@ -298,24 +303,10 @@ function AppContent() {
                     height: 40,
                     marginLeft: 1,
                     marginRight: 1,
-                    border: '2px solid #251db9'
+                    border: '2px solid #251db9',
+                    cursor: 'pointer'
                   }}
-                />
-                <Icon
-                  sx={{
-                    width: 35,
-                    height: 30,
-                    cursor: "pointer",
-                    backgroundColor: '#251db9',
-                    borderRadius: '20%',
-                    padding: '5px',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: '#1f1ba0'
-                    }
-                  }}
-                  component={LogoutIcon}
-                  onClick={handleLogout}
+                  onClick={handleProfileOpen}
                 />
               </>
             ) : (
@@ -368,6 +359,11 @@ function AppContent() {
       <AuthModal
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
+      />
+
+      <Profile
+        open={profileOpen}
+        onClose={handleProfileClose}
       />
     </div>
   );

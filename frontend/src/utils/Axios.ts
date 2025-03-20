@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { store } from '../store/authStore';
 import { selectCurrentToken, setCredentials } from '../store/authStore';
-import { refreshAccessToken } from '../services/userServices';
+import { refreshAccessToken } from '../services/user.services';
 
 // Création de l'instance Axios avec l'URL de base et les headers par défaut
 const Axios = axios.create({
