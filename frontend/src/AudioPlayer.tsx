@@ -146,7 +146,7 @@ function Player({ currentTrack }: PlayerProps) {
                     }}
                     placement={{
                         player: "top",
-                        volumeSlider: "bottom",
+                        volumeSlider: "right",
                         interface: {
                             templateArea: {
                                 volume: "row1-8 / col1-9",
@@ -156,7 +156,7 @@ function Player({ currentTrack }: PlayerProps) {
                     activeUI={{
                         all: true,
                         progress: "waveform",
-                        playlist: false,
+                        playList: false,
                         repeatType: false,
                         prevNnext: false,
                     }}
