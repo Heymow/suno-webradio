@@ -5,6 +5,15 @@
     align-items: flex-start;
     flex-direction: column;
     z-index: 10;
+    position: fixed;
+    left: 28%;
+}
+
+/* Masquer la div pour les écrans dont la largeur est inférieure ou égale à 600px */
+@media screen and (max-width: 1100px) {
+    .audioPlayer {
+        padding-left: 2.5%;
+    }
 }
 
 .audioPlayerLoading {

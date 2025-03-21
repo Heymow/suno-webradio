@@ -2,10 +2,25 @@ import React, { useEffect, useState, useRef } from "react";
 import AudioPlayer from "react-modern-audio-player";
 import styles from "./styles/AudioPlayer.module.css";
 import { Height } from "@mui/icons-material";
-import { height, maxHeight, maxWidth } from "@mui/system";
+import { height, margin, maxHeight, maxWidth, minWidth } from "@mui/system";
 
 interface PlayerProps {
     currentTrack: any;
+}
+
+// Hook personnalisé pour suivre la largeur de la fenêtre
+function useWindowWidth() {
+    const [width, setWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => setWidth(window.innerWidth);
+
+        window.addEventListener('resize', handleResize);
+        // Nettoyage de l'événement lors du démontage du composant
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return width;
 }
 
 function Player({ currentTrack }: PlayerProps) {
@@ -13,6 +28,9 @@ function Player({ currentTrack }: PlayerProps) {
     const [isAudioReady, setIsAudioReady] = useState(false);
     const [audioError, setAudioError] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const width = useWindowWidth();
+    let screenSize = width > 1400 ? 'big' : 'medium';
+    width < 1100 && (screenSize = 'small');
 
     // Référence vers l'élément audio
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
@@ -150,6 +168,7 @@ function Player({ currentTrack }: PlayerProps) {
                         interface: {
                             templateArea: {
                                 volume: "row1-8 / col1-9",
+                                trackTimeDuration: "row1-5",
                             }
                         }
                     }}
@@ -159,8 +178,10 @@ function Player({ currentTrack }: PlayerProps) {
                         playList: false,
                         repeatType: false,
                         prevNnext: false,
+                        trackInfo: screenSize === "big",
+                        artwork: !(screenSize === "small"),
                     }}
-                    rootContainerProps={{ width: "40vw" }}
+                    rootContainerProps={{ width: (screenSize === "small") ? "45%" : "52.2%", minWidth: "300px", maxWidth: "2000px" }}
                 />
             ) : (
                 <div className={styles.audioPlayerLoading}>
