@@ -9,7 +9,7 @@ import Icon from '@mui/material/Icon';
 import AuthModal from "./AuthModal";
 import Profile from "./components/profile";
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { selectCurrentUser, selectCurrentAvatar } from './store/authStore';
+import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated } from './store/authStore';
 import { useSnackbar } from 'notistack';
 import Avatar from '@mui/material/Avatar';
 import Axios from './utils/Axios';
@@ -82,15 +82,42 @@ function AppContent() {
   const dispatch = useAppDispatch();
   const username = useAppSelector(selectCurrentUser);
   const userAvatar = useAppSelector(selectCurrentAvatar);
+  const userId = useAppSelector(selectCurrentUserId);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   // Refs pour éviter les dépendances cycliques
   const currentTrackRef = useRef(currentTrack);
   const snackBarRef = useRef(snackBar);
 
+  // Vérifier la cohérence des données d'authentification au chargement
+  useEffect(() => {
+    // Vérifier et réparer les incohérences dans le store (par exemple, authentifié mais sans userId)
+    dispatch(validateAndRefreshUserData());
+  }, [dispatch]);
+
   useEffect(() => {
     currentTrackRef.current = currentTrack;
     snackBarRef.current = snackBar;
   }, [currentTrack, snackBar]);
+
+  // Vérifier l'état d'activation du compte
+  useEffect(() => {
+    const checkActivationStatus = async () => {
+      if (userId && isAuthenticated) {
+        try {
+          const response = await Axios.get(`/users/activation-status/${userId}`);
+          const isActivated = response.data.isActivated;
+          dispatch(setAccountActivated(isActivated));
+        } catch (error) {
+          console.error("Erreur lors de la vérification du statut d'activation:", error);
+        }
+      }
+    };
+
+    if (userId) {
+      checkActivationStatus();
+    }
+  }, [userId, isAuthenticated, dispatch]);
 
   // SSE Connection
   useEffect(() => {
@@ -219,7 +246,8 @@ function AppContent() {
   };
 
   const handleSubmitSong = async () => {
-    if (!username) {
+    // Vérifier à nouveau si l'utilisateur est authentifié et a un ID
+    if (!username || !userId) {
       snackBarRef.current(ERROR_MESSAGES.LOGIN_REQUIRED, { variant: 'warning' });
       setLoginModalOpen(true);
       return;
@@ -254,6 +282,16 @@ function AppContent() {
 
 
   const handleProfileOpen = () => {
+    // Vérifier que l'ID existe toujours avant d'ouvrir le profil
+    if (isAuthenticated && !userId) {
+      // Si l'ID a disparu, forcer une validation
+      dispatch(validateAndRefreshUserData());
+      snackBarRef.current('Une erreur avec votre session a été détectée. Veuillez vous reconnecter.', {
+        variant: 'warning'
+      });
+      setLoginModalOpen(true);
+      return;
+    }
     setProfileOpen(true);
   };
 

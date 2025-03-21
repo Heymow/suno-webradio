@@ -10,8 +10,8 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { loginUser, createUser } from './services/user.services';
 import { useAppDispatch } from './store/hooks';
-import { setCredentials } from './store/authStore';
 import { useSnackbar } from 'notistack';
+import { setCredentials } from './store/authStore';
 import { processAvatar } from './services/image.service';
 
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
@@ -60,7 +60,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 dispatch(setCredentials({
                     token: response.token,
                     username: response.user.username,
-                    avatar: response.user.avatar
+                    avatar: response.user.avatar,
+                    _id: response.user._id,
+                    isActivated: response.user.isActivated || false
                 }));
                 snackBar('Connexion réussie', { variant: 'success' });
                 onClose();
@@ -131,7 +133,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 dispatch(setCredentials({
                     token: newUser.token,
                     username: newUser.user.username,
-                    avatar: newUser.user.avatar
+                    avatar: newUser.user.avatar,
+                    _id: newUser.user._id
                 }));
                 snackBar('Inscription réussie', { variant: 'success' });
                 onClose();

@@ -1,0 +1,240 @@
+.dialogPaper {
+    background-color: #080821 !important;
+    color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    max-width: 500px !important;
+    padding: 16px !important;
+}
+
+.dialogHeader {
+    background: linear-gradient(90deg, #251db9 0%, #3023ae 100%);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 !important;
+}
+
+.headerTitle {
+    font-weight: bold !important;
+    font-size: 1.25rem !important;
+    color: white !important;
+    margin: 0 !important;
+}
+
+.introText {
+    margin-bottom: 24px !important;
+    font-size: 16px !important;
+    color: white !important;
+}
+
+.pulsifyIdBox {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid rgba(37, 29, 185, 0.4);
+}
+
+.glowingText {
+    color: #6c63ff !important;
+    text-shadow: 0 0 8px rgba(108, 99, 255, 0.6);
+    font-weight: bold !important;
+    margin: 0 !important;
+}
+
+.styledButton {
+    background: linear-gradient(90deg, #251db9 0%, #3b30d1 100%) !important;
+    color: white !important;
+    padding: 8px 24px !important;
+    border-radius: 8px !important;
+    text-transform: none !important;
+    font-weight: bold !important;
+    transition: all 0.3s ease !important;
+}
+
+.styledButton:hover {
+    background: linear-gradient(90deg, #3023ae 0%, #4338e0 100%) !important;
+    box-shadow: 0 6px 12px rgba(37, 29, 185, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+.closeButton {
+    color: white !important;
+    padding: 8px !important;
+    margin-left: 8px !important;
+}
+
+.copyButton {
+    color: #6c63ff !important;
+    padding: 8px !important;
+}
+
+.copyButtonSuccess {
+    color: #4CAF50 !important;
+    padding: 8px !important;
+}
+
+.stepNumber {
+    font-weight: bold !important;
+    color: #6c63ff !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+}
+
+.stepText {
+    font-size: 14px !important;
+    color: white !important;
+    margin: 0 !important;
+}
+
+.stepLink {
+    color: #6c63ff !important;
+    text-decoration: none !important;
+}
+
+.stepLink:hover {
+    text-decoration: underline !important;
+}
+
+.infoText {
+    font-style: italic !important;
+    opacity: 0.8 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+    color: white !important;
+}
+
+.dialogContent {
+    margin-top: 16px !important;
+    padding: 16px !important;
+    color: white !important;
+}
+
+.dialogActions {
+    padding: 16px !important;
+    justify-content: center !important;
+}
+
+.stepsContainer {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin-left: 8px !important;
+    margin-bottom: 24px !important;
+}
+
+.stepContainer {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+}
+
+.errorText {
+    color: #ff4d4d !important;
+    text-align: center !important;
+    margin: 20px 0 !important;
+    font-size: 16px !important;
+    padding: 16px !important;
+    background-color: rgba(255, 77, 77, 0.1) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 77, 77, 0.3) !important;
+}
+
+.sunoLinkContainer {
+    margin-top: 24px !important;
+    padding: 16px !important;
+    background-color: rgba(37, 29, 185, 0.1) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(37, 29, 185, 0.3) !important;
+}
+
+.sunoLinkTitle {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+    color: white !important;
+}
+
+.sunoLinkInputBox {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.sunoLinkInput {
+    flex: 1 !important;
+}
+
+.sunoLinkInput div {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 6px !important;
+}
+
+.sunoLinkInput input {
+    color: white !important;
+    padding: 12px 14px !important;
+}
+
+.sunoLinkInput fieldset {
+    border-color: rgba(108, 99, 255, 0.4) !important;
+}
+
+.sunoLinkInput:hover fieldset {
+    border-color: rgba(108, 99, 255, 0.7) !important;
+}
+
+.submitLinkButton {
+    background: linear-gradient(90deg, #251db9 0%, #3b30d1 100%) !important;
+    color: white !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    transition: all 0.3s ease !important;
+}
+
+.submitLinkButton:hover {
+    background: linear-gradient(90deg, #3023ae 0%, #4338e0 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(37, 29, 185, 0.4) !important;
+}
+
+.submitLinkButton:disabled {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.successIcon {
+    color: #4CAF50 !important;
+}
+
+.errorIcon {
+    color: #ff4d4d !important;
+    margin-right: 8px !important;
+}
+
+.helperText {
+    color: #ff4d4d !important;
+    margin-left: 0 !important;
+    margin-top: 4px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+}
+
+.loadingSpinner {
+    color: white !important;
+}
+
+.successText {
+    color: #4CAF50 !important;
+    margin-top: 12px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+}
