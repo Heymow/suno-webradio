@@ -67,7 +67,8 @@ Axios.interceptors.response.use(
                     store.dispatch(setCredentials({
                         token: response.token,
                         username: response.user.username,
-                        avatar: response.user.avatar
+                        avatar: response.user.avatar,
+                        _id: response.user._id
                     }));
 
                     Axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;

@@ -7,11 +7,12 @@
     position: relative;
 }
 
-.backButton {
+.backBtn {
     position: absolute !important;
     left: 5px;
     top: 10px;
-    color: white;
+    color: white !important;
+    background-color: rgba(37, 29, 185, 0.1) !important;
 }
 
 .listItemButton {
@@ -45,6 +46,40 @@
     background: linear-gradient(90deg, #3023ae 0%, #4338e0 100%) !important;
     box-shadow: 0 6px 12px rgba(37, 29, 185, 0.4);
     transform: translateY(-2px);
+}
+
+.activatedButton {
+    background: linear-gradient(90deg, #1a8754 0%, #20a362 100%) !important;
+    box-shadow: 0 4px 10px rgba(26, 135, 84, 0.3);
+    opacity: 1 !important;
+    margin: 16px auto !important;
+    cursor: default !important;
+}
+
+.activatedButton:hover {
+    background: linear-gradient(90deg, #1a8754 0%, #20a362 100%) !important;
+    box-shadow: 0 6px 12px rgba(26, 135, 84, 0.4);
+    transform: none;
+}
+
+.checkIcon {
+    color: white;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
 }
 
 .contentWrapper {
