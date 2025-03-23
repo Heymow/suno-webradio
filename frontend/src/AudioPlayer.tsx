@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import AudioPlayer from "react-modern-audio-player";
+import AudioPlayer from "./components/CustomAudioPlayer";
 import styles from "./styles/AudioPlayer.module.css";
 import { Height } from "@mui/icons-material";
 import { height, margin, maxHeight, maxWidth, minWidth } from "@mui/system";
@@ -155,34 +155,35 @@ function Player({ currentTrack }: PlayerProps) {
     return (
         <div className={styles.audioPlayer}>
             {isAudioReady && playList.length > 0 ? (
-                <AudioPlayer
-                    className={styles.audioPlayer}
-                    playList={playList}
-                    audioInitialState={{
-                        muted: false,
-                        curPlayId: playList[0].id,
-                    }}
-                    placement={{
-                        player: "top",
-                        volumeSlider: "right",
-                        interface: {
-                            templateArea: {
-                                volume: "row1-8 / col1-9",
-                                trackTimeDuration: "row1-5",
+                <div className={styles.audioPlayer}>
+                    <AudioPlayer
+                        playList={playList}
+                        audioInitialState={{
+                            muted: false,
+                            curPlayId: playList[0].id,
+                        }}
+                        placement={{
+                            player: "top",
+                            volumeSlider: "right",
+                            interface: {
+                                templateArea: {
+                                    volume: "row1-8 / col1-9",
+                                    trackTimeDuration: "row1-5",
+                                }
                             }
-                        }
-                    }}
-                    activeUI={{
-                        all: true,
-                        progress: "waveform",
-                        playList: false,
-                        repeatType: false,
-                        prevNnext: false,
-                        trackInfo: screenSize === "big",
-                        artwork: !(screenSize === "small"),
-                    }}
-                    rootContainerProps={{ width: (screenSize === "small") ? "45%" : "52.2%", minWidth: "300px", maxWidth: "2000px" }}
-                />
+                        }}
+                        activeUI={{
+                            all: true,
+                            progress: "waveform",
+                            playList: false,
+                            repeatType: false,
+                            prevNnext: false,
+                            trackInfo: screenSize === "big",
+                            artwork: !(screenSize === "small"),
+                        }}
+                        rootContainerProps={{ width: (screenSize === "small") ? "45%" : "52.2%", minWidth: "300px", maxWidth: "2000px" }}
+                    />
+                </div>
             ) : (
                 <div className={styles.audioPlayerLoading}>
                     {audioError || "Chargement du lecteur..."}

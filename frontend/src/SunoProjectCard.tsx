@@ -88,15 +88,15 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                     }
                     title={<Typography className={styles.headerCard} variant="h6">{titleText}
                         <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
-                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.playCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.playCount}</div>}>
+                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginLeft: "-5px", marginRight: "5px", fontSize: '19px' }} /> {Math.floor(props.playCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '19px' }} /> {props.playCount}</div>}>
                         </Chip>
                     </Typography>}
 
                     subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
                         <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '16px' }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginRight: "5px", fontSize: '16px' }} /> {props.upVoteCount}</div>}>
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '16px' }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
+                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '13px' }} /> {props.upVoteCount}</div>}>
                         </Chip>
                     </Typography>}
 
@@ -105,7 +105,7 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                     <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column' }}>
                         Style of Music : {prompt}
                         {negativePrompt && <Typography sx={{ paddingTop: '5px' }}>Exclude Styles : {negativePrompt}</Typography>}
-                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px" }} />
+                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", fontSize: "12px" }} />
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
                             <button className={styles.likeButton}>Vote</button>
                         </Box>

@@ -17,10 +17,12 @@ import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
-import { styled } from '@mui/system';
+import { style, styled, width } from '@mui/system';
 import { Button as BaseButton, buttonClasses } from '@mui/base/Button';
 import Stack from '@mui/material/Stack';
 import zIndex from "@mui/material/styles/zIndex";
+import { Link } from "@mui/material";
+import { Image } from "@mui/icons-material";
 
 // Constants
 const ERROR_MESSAGES = {
@@ -309,7 +311,7 @@ function AppContent() {
 
   let sunoLinkContainer = clickedPlusButton ? (
     <div className={styles.inputSunoLinkContainer}>
-      <p style={{ fontWeight: 500 }}>Submit :</p>
+      <p style={{ fontWeight: 400, fontSize: "15px" }}>Submit :</p>
       <input
         placeholder="Paste your Suno song link here..."
         className={styles.inputSunoLink}
@@ -345,7 +347,6 @@ function AppContent() {
         </p>
         <div className={styles.audioPlayer}>
           <AudioPlayer currentTrack={currentTrack} />
-          <div className={styles.clickBlocker}></div>
         </div>
         <div className={styles.topRightButtonsContainer}>
           <div className={styles.userContainer}>
@@ -409,8 +410,17 @@ function AppContent() {
       </div>
 
       <footer className={styles.footer}>
-        {sunoLinkContainer}
-        <div className={styles.explanatorytext}>{!clickedPlusButton ? "Submit your song" : "Insert your song link"}</div>
+        <div className={styles.footerLeftContainer}>
+          <Link href="https://discord.gg/DnXUDCuFCD" target="_blank" rel="noopener noreferrer" className={styles.discordContainer}>
+            <div>
+              <img src='/public/discord.png' alt='Discord icon' className={styles.discordImage} />
+            </div>
+            <div className={styles.discordLink}>Join Discord</div>
+          </Link>
+        </div>
+        <div className={styles.sunoLinkContainer}>{sunoLinkContainer}
+          <div className={styles.explanatorytext}>{!clickedPlusButton ? "Submit your song" : "Insert your song link"}</div></div>
+        <div className={styles.footerRightContainer} />
       </footer>
 
       <AuthModal

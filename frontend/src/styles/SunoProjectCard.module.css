@@ -30,7 +30,9 @@
 .fragment {
     display: flex;
     align-items: center;
+    padding-top: 2px;
     height: 25px;
+    font-size: smaller;
 }
 
 .headerCard {

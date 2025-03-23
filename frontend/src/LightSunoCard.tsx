@@ -41,18 +41,45 @@ export default function RecipeReviewCard(props: SunoSong): JSX.Element {
                     className={styles.cardHeader}
                     sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2, padding: '5px' }}
                     avatar={
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.avatarImage}>
+                        <Avatar sx={{
+                            bgcolor: red[500],
+                            marginLeft: "7px"
+                        }
+                        }
+                            aria-label="avatar" src={props.avatarImage}>
                         </Avatar>
-
                     }
-                    title={<Typography className={styles.headerCard} variant="h6" fontSize='100%'>{subheaderText}
+                    title={<Typography className={styles.headerCard} variant="h6" fontSize='100%' fontWeight={600}>
+                        {subheaderText}
+                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={
+                            props.upVoteCount >= 1000 ?
+                                <div className={styles.fragment}>
+                                    <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '12px' }} />
+                                    {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
+                                <div className={styles.fragment}>
+                                    <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '12px' }} />
+                                    {props.upVoteCount}
+                                </div>
+                        }>
+                        </Chip>
                     </Typography>}
-                    subheader={<Typography className={styles.lightHeaderCard} fontSize='80%'>{titleText.length > 20 ? titleText.slice(0, 50) + "..." : titleText}
-                        {/* <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
-                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' /> {Math.floor(props.playCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' /> {props.playCount}</div>}>
-                            </Chip> */}
-                    </Typography>}
+                    subheader={
+                        <Typography className={styles.lightHeaderCard} fontSize='80%'>
+                            {titleText.length > 20 ?
+                                titleText.slice(0, 50) + "..." : titleText}
+                            <Chip sx={{ height: '25px' }} label={
+                                props.playCount >= 1000 ?
+                                    <div className={styles.fragment}>
+                                        <PlayArrowIcon fontSize='small' />
+                                        {Math.floor(props.playCount / 1000) + "K"}
+                                    </div> :
+                                    <div className={styles.fragment}>
+                                        <PlayArrowIcon fontSize='small' />
+                                        {props.playCount}
+                                    </div>
+                            }>
+                            </Chip>
+                        </Typography>}
 
 
                 />

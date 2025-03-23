@@ -118,8 +118,8 @@
   bottom: 0;
   width: 100%;
   display: flex;
-  justify-content: center;
-  flex-direction: column;
+  justify-content: space-between;
+  /* flex-direction: column; */
   align-items: center;
   padding-top: 10vh;
   z-index: 0;
@@ -134,6 +134,83 @@
   transform: translateY(-50%);
 }
 
+.footerLeftContainer {
+  width: 33%;
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: center;
+  margin-left: 4%;
+  margin-top: 2%;
+  height: 10%;
+  max-height: 10%;
+}
+
+.discordContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* width: 33%; */
+  /* height: 10%; */
+  /* max-height: 10%; */
+  position: fixed;
+  /* min-height: 0px; */
+  /* font-size: 1vw; */
+  /* font-size: calc(40% + 0.3vw + 0.3vh); */
+}
+
+.discordImage {
+  width: 6.2vh;
+  /* height: 80%; */
+  max-width: 100%;
+  margin-right: -10px;
+  margin-left: 6%;
+  margin-top: -120%;
+  margin-bottom: -30%;
+  /* position: fixed; */
+}
+
+a:link {
+  color: white;
+  text-decoration: none;
+}
+
+a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white !important;
+  text-decoration: none;
+}
+
+.discordLink {
+  font-weight: 400;
+  font-size: 1.01vh;
+  background-color: #433f3f;
+  border-radius: 20%;
+  padding: 0.7vh;
+  margin-top: 10%;
+  margin-left: 5px;
+  position: static;
+  min-width: 10%;
+  text-align: center;
+}
+
+.sunoLinkContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 10%;
+  max-height: 10%;
+  font-size: 1vw;
+  font-size: calc(40% + 0.3vw + 0.3vh);
+}
+
 .inputSunoLinkContainer {
   transition: ease-in 2s ease-in;
   width: 70vw;
@@ -141,6 +218,7 @@
   justify-content: center;
   align-items: center;
   height: 30%;
+  margin-bottom: calc(2vh - 5px);
 }
 
 .inputSunoLink {
@@ -151,6 +229,31 @@
   border-radius: 10px;
   border: 1px solid #333;
   margin: 10px;
+}
+
+.openPlusButton {
+  /* background-color: #251db9; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 40px;
+  font-size: 16px;
+  width: 38px;
+  height: 45px;
+  font-weight: 500;
+  font-size: x-large;
+  transition: background-color 0.2s ease;
+  padding: 0;
+  padding-bottom: 4px;
+  padding-right: 2px;
+}
+
+.openPlusButton:hover {
+  background-color: #edecf6;
+  color: black;
 }
 
 .plusButton {
@@ -179,9 +282,17 @@
 }
 
 .explanatorytext {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 10px;
+  font-size: 13px;
+  font-weight: 400;
+  margin: 5px;
+}
+
+.footerRightContainer {
+  width: 33%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 20px;
 }
 
 .previousAndNextSongsContainer {
