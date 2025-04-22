@@ -118,26 +118,18 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
 
             <div style={{ zIndex: 1, marginTop: '-20px' }}>
 
-                {props.lyrics ? <div style={{ "marginLeft": "30px" }}>Lyrics</div> : null}
-                {props.lyrics && <CardContent
-                    sx={{
-                        maxWidth: 400,
-                        maxHeight: '60vh',
-                        marginLeft: 2,
-                        height: 450,
-                        overflowY: 'auto',
-                        padding: 2,
-                        boxSizing: 'border-box',
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        borderRadius: '4px',
-                    }}
-                >
-                    {typedLyrics?.split('\n').map((line, index) => (
-                        <Typography variant="body2" key={index} sx={{ marginBottom: 1, color: 'rgba(0, 0, 0, 0.6)' }}>
-                            {line}
-                        </Typography>
-                    ))}
-                </CardContent>}
+                {props.lyrics && (
+                    <>
+                        <div className={styles.lyricsLabel}>Lyrics</div>
+                        <div className={styles.lyricsFolder}>
+                            {typedLyrics?.split('\n').map((line, index) => (
+                                <Typography variant="body2" key={index} sx={{ marginBottom: 1, color: 'rgba(0, 0, 0, 0.6)' }}>
+                                    {line}
+                                </Typography>
+                            ))}
+                        </div>
+                    </>
+                )}
 
             </div>
 

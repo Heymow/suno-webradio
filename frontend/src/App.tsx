@@ -361,7 +361,7 @@ function AppContent() {
                     width: 40,
                     height: 40,
                     marginLeft: 1,
-                    // marginRight: 1,
+                    marginRight: 1,
                     border: '2px solid #251db9',
                     cursor: 'pointer'
                   }}
