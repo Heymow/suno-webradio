@@ -23,6 +23,7 @@ import Stack from '@mui/material/Stack';
 import zIndex from "@mui/material/styles/zIndex";
 import { Link } from "@mui/material";
 import { Image } from "@mui/icons-material";
+import { purple } from "@mui/material/colors";
 
 // Constants
 const ERROR_MESSAGES = {
@@ -360,7 +361,7 @@ function AppContent() {
                     width: 40,
                     height: 40,
                     marginLeft: 1,
-                    marginRight: 1,
+                    // marginRight: 1,
                     border: '2px solid #251db9',
                     cursor: 'pointer'
                   }}
@@ -386,7 +387,7 @@ function AppContent() {
               />
             )}
           </div>
-          <button className={`${styles.topRightButtons} ${styles.helpButton}`}>?</button>
+          <Button className={`${styles.topRightButtons} ${styles.helpButton}`}>?</Button>
         </div>
       </header>
 
@@ -447,6 +448,19 @@ const blue = {
   500: '#007FFF',
   600: '#0072E6',
   700: '#0059B3',
+  800: '#004C99',
+  900: '#003A75',
+};
+
+const custom = {
+  50: '#F0F7FF',
+  100: '#C2E0FF',
+  200: '#99CCF3',
+  300: '#66B2FF',
+  400: 'rgb(98, 117, 227)',
+  500: 'rgb(43, 61, 161)',
+  600: 'rgb(75, 90, 174)',
+  700: 'rgb(43, 61, 161)',
   800: '#004C99',
   900: '#003A75',
 };
@@ -544,28 +558,28 @@ const Button = styled(BaseButton)(
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.5;
-  background-color: ${blue[500]};
+  background-color: ${custom[500]};
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 30px;
   color: white;
   transition: all 150ms ease;
   cursor: pointer;
-  border: 1px solid ${blue[500]};
+  border: 1px solid ${custom[500]};
   box-shadow: 0 2px 1px ${theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(45, 45, 60, 0.2)'
-    }, inset 0 1.5px 1px ${blue[400]}, inset 0 -2px 1px ${blue[600]};
+    }, inset 0 1.5px 1px ${custom[400]}, inset 0 -2px 1px ${custom[600]};
 
   &:hover {
-    background-color: ${blue[600]};
+    background-color: ${custom[600]};
   }
 
   &.${buttonClasses.active} {
-    background-color: ${blue[700]};
+    background-color: ${custom[700]};
     box-shadow: none;
     transform: scale(0.99);
   }
 
   &.${buttonClasses.focusVisible} {
-    box-shadow: 0 0 0 4px ${theme.palette.mode === 'dark' ? blue[300] : blue[200]};
+    box-shadow: 0 0 0 4px ${theme.palette.mode === 'dark' ? custom[300] : custom[200]};
     outline: none;
   }
 

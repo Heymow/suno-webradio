@@ -383,18 +383,6 @@ a:hover {
 
 }
 
-.clickBlocker {
-  position: fixed;
-  top: -5px;
-  left: 35%;
-  width: 30vw;
-  height: 120px;
-  z-index: 10;
-  pointer-events: auto;
-  background: transparent;
-  cursor: not-allowed;
-}
-
 @media (max-width: 768px) {
   .clickBlocker {
     display: none;
