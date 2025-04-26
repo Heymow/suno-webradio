@@ -16,6 +16,7 @@ interface SunoSong {
     radioPlayCount?: number;
     sunoLink?: string;
     userId?: string;
+    timeUntilPlay?: string;
 }
 
 interface Playlist {

@@ -1,0 +1,413 @@
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 0;
+    background: linear-gradient(180deg, rgba(37, 29, 185, 0.1) 0%, rgba(37, 29, 185, 0) 100%);
+    position: relative;
+}
+
+.backBtn {
+    position: absolute !important;
+    left: 5px;
+    top: 10px;
+    color: white !important;
+    background-color: rgba(37, 29, 185, 0.1) !important;
+}
+
+.listItemButton {
+    margin: 4px auto !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 85%;
+    justify-content: center;
+}
+
+.listItemButton:hover {
+    background-color: rgba(37, 29, 185, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+.activateButton {
+    margin: 16px auto !important;
+    display: flex;
+    background: linear-gradient(90deg, #251db9 0%, #3b30d1 100%) !important;
+    color: white !important;
+    border-radius: 8px;
+    text-transform: none;
+    font-weight: bold;
+    padding: 10px 20px;
+    width: 80%;
+    box-shadow: 0 4px 10px rgba(37, 29, 185, 0.3);
+    transition: all 0.3s ease;
+}
+
+.activateButton:hover {
+    background: linear-gradient(90deg, #3023ae 0%, #4338e0 100%) !important;
+    box-shadow: 0 6px 12px rgba(37, 29, 185, 0.4);
+    transform: translateY(-2px);
+}
+
+.activatedButton {
+    background: linear-gradient(90deg, #1a8754 0%, #20a362 100%) !important;
+    box-shadow: 0 4px 10px rgba(26, 135, 84, 0.3);
+    opacity: 1 !important;
+    margin: 16px auto !important;
+    cursor: default !important;
+}
+
+.activatedButton:hover {
+    background: linear-gradient(90deg, #1a8754 0%, #20a362 100%) !important;
+    box-shadow: 0 6px 12px rgba(26, 135, 84, 0.4);
+    transform: none;
+}
+
+.checkIcon {
+    color: white;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
+}
+
+.contentWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.logoutButton {
+    margin: 8px auto !important;
+    border-radius: 8px;
+    color: #f44336;
+    transition: all 0.2s ease;
+    padding: 2px 10px;
+    height: 36px;
+    width: 80%;
+    justify-content: center;
+}
+
+.logoutButton:hover {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+.iconColor {
+    color: #6c63ff;
+}
+
+.logoutIconColor {
+    color: #f44336;
+}
+
+.divider {
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+}
+
+.avatar {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 16px;
+    border: 3px solid #251db9;
+    box-shadow: 0 0 20px rgba(37, 29, 185, 0.6);
+}
+
+.profileName {
+    font-weight: bold;
+}
+
+.profileDrawer {
+    width: 400px;
+    background-color: #080821;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.logoutContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bottomSpacer {
+    margin-bottom: 24px;
+}
+
+.profileDetailsContainer {
+    padding: 2rem;
+    color: white;
+    border-radius: 0;
+    margin: 0;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(37, 29, 185, 0.1) 0%, rgba(37, 29, 185, 0) 100%);
+}
+
+.profileDetailsContent {
+    max-width: 600px;
+    margin: 0 auto;
+    height: 100%;
+}
+
+.avatarContainer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.largeAvatar {
+    width: 120px !important;
+    height: 120px !important;
+    border: 3px solid #ffffff;
+}
+
+.detailTitle {
+    margin-bottom: 2rem !important;
+    text-align: center;
+    color: #ffffff;
+}
+
+.detailLabel {
+    color: #888888;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem !important;
+}
+
+.detailValue {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem !important;
+}
+
+.errorMessage {
+    text-align: center;
+    margin-top: 1rem !important;
+}
+
+.songsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.songItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.cardAndDelete {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.deleteButton {
+    color: #f44336 !important;
+    padding: 0.5rem !important;
+    min-width: 32px !important;
+    height: 32px !important;
+}
+
+.deleteButton:hover {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+}
+
+.addSongContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.inputSunoLinkContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+}
+
+.inputSunoLink {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.9rem;
+}
+
+.plusButton {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #251db9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+    padding-bottom: 2px;
+    position: relative;
+}
+
+.plusButton::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+.plusButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.openPlusButton {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #251db9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+    padding-bottom: 2px;
+    position: relative;
+}
+
+.openPlusButton::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+.explanatoryText {
+    color: #888888;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.placeholderCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.placeholderText {
+    color: #888888;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.placeholderSubtext {
+    color: #666666;
+    font-size: 0.8rem;
+}
+
+.songCardContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+    box-sizing: border-box;
+}
+
+.radioStats {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-top: 0.25rem;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+}
+
+.statLabel {
+    color: #888888;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
+}
+
+.statValue {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
+}
+
+.usedSlotCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    box-sizing: border-box;
+}

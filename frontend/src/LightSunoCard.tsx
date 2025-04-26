@@ -49,34 +49,34 @@ export default function RecipeReviewCard(props: SunoSong): JSX.Element {
                             aria-label="avatar" src={props.avatarImage}>
                         </Avatar>
                     }
-                    title={<Typography className={styles.headerCard} variant="h6" fontSize='100%' fontWeight={600}>
+                    title={<Typography className={styles.headerCard} variant="h6" fontSize='100%' fontWeight={600} component="div">
                         {subheaderText}
                         <Chip sx={{ height: '25px', marginLeft: "0px" }} label={
                             props.upVoteCount >= 1000 ?
-                                <div className={styles.fragment}>
+                                <span className={styles.fragment}>
                                     <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '12px' }} />
-                                    {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                                <div className={styles.fragment}>
+                                    {Math.floor(props.upVoteCount / 1000) + "K"} </span> :
+                                <span className={styles.fragment}>
                                     <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '12px' }} />
                                     {props.upVoteCount}
-                                </div>
+                                </span>
                         }>
                         </Chip>
                     </Typography>}
                     subheader={
-                        <Typography className={styles.lightHeaderCard} fontSize='80%'>
+                        <Typography className={styles.lightHeaderCard} fontSize='80%' component="div">
                             {titleText.length > 20 ?
                                 titleText.slice(0, 50) + "..." : titleText}
                             <Chip sx={{ height: '25px' }} label={
                                 props.playCount >= 1000 ?
-                                    <div className={styles.fragment}>
+                                    <span className={styles.fragment}>
                                         <PlayArrowIcon fontSize='small' />
                                         {Math.floor(props.playCount / 1000) + "K"}
-                                    </div> :
-                                    <div className={styles.fragment}>
+                                    </span> :
+                                    <span className={styles.fragment}>
                                         <PlayArrowIcon fontSize='small' />
                                         {props.playCount}
-                                    </div>
+                                    </span>
                             }>
                             </Chip>
                         </Typography>}

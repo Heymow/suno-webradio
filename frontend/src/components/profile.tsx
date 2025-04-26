@@ -13,6 +13,8 @@ import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, selectIsAu
 import ActivateAccountDialog from './dialog/activateAccount';
 import styles from '../styles/Profile.module.css';
 import Axios from '../utils/Axios';
+import ProfileDetails from './ProfileDetails';
+import MyMusicSent from './MyMusicSent';
 
 interface ProfileProps {
     open: boolean;
@@ -21,6 +23,8 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+    const [showProfileDetails, setShowProfileDetails] = useState(false);
+    const [showMusicSent, setShowMusicSent] = useState(false);
     const [pulsifyId, setPulsifyId] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
 
@@ -76,6 +80,22 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
 
     const handleCloseActivateDialog = () => {
         setActivateDialogOpen(false);
+    };
+
+    const handleProfileClick = () => {
+        setShowProfileDetails(true);
+    };
+
+    const handleCloseProfileDetails = () => {
+        setShowProfileDetails(false);
+    };
+
+    const handleMusicSentClick = () => {
+        setShowMusicSent(true);
+    };
+
+    const handleCloseMusicSent = () => {
+        setShowMusicSent(false);
     };
 
     return (
@@ -150,29 +170,29 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                                 <Divider className={styles.divider} />
 
                                 <List sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <ListItemButton className={styles.listItemButton}>
+                                    <ListItemButton className={styles.listItemButton} onClick={handleProfileClick}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <PersonIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="profile" />
+                                        <ListItemText primary="Profile" />
                                     </ListItemButton>
-                                    <ListItemButton className={styles.listItemButton}>
+                                    <ListItemButton className={styles.listItemButton} onClick={handleMusicSentClick}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <HistoryIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="music sent history" />
+                                        <ListItemText primary="My music sent" />
                                     </ListItemButton>
                                     <ListItemButton className={styles.listItemButton}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <ReportIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="reports" />
+                                        <ListItemText primary="Reports" />
                                     </ListItemButton>
                                     <ListItemButton className={styles.listItemButton}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <SettingsIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="settings" />
+                                        <ListItemText primary="Settings" />
                                     </ListItemButton>
                                 </List>
                             </div>
@@ -203,6 +223,56 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 onClose={handleCloseActivateDialog}
                 pulsifyId={pulsifyId}
             />
+
+            <Drawer
+                anchor="right"
+                open={showProfileDetails}
+                onClose={handleCloseProfileDetails}
+                PaperProps={{
+                    sx: {
+                        width: '400px',
+                        backgroundColor: '#080821',
+                        borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white'
+                    }
+                }}
+                transitionDuration={300}
+            >
+                <Box className={styles.contentWrapper}>
+                    <IconButton
+                        onClick={handleCloseProfileDetails}
+                        className={styles.backBtn}
+                    >
+                        <ArrowForwardIcon />
+                    </IconButton>
+                    <ProfileDetails onClose={handleCloseProfileDetails} />
+                </Box>
+            </Drawer>
+
+            <Drawer
+                anchor="right"
+                open={showMusicSent}
+                onClose={handleCloseMusicSent}
+                PaperProps={{
+                    sx: {
+                        width: '400px',
+                        backgroundColor: '#080821',
+                        borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white'
+                    }
+                }}
+                transitionDuration={300}
+            >
+                <Box className={styles.contentWrapper}>
+                    <IconButton
+                        onClick={handleCloseMusicSent}
+                        className={styles.backBtn}
+                    >
+                        <ArrowForwardIcon />
+                    </IconButton>
+                    <MyMusicSent />
+                </Box>
+            </Drawer>
         </>
     );
 };
