@@ -61,6 +61,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     token: response.token,
                     username: response.user.username,
                     avatar: response.user.avatar,
+                    sunoUsername: response.user.sunoUsername,
                     _id: response.user._id,
                     isActivated: response.user.isActivated || false
                 }));
@@ -133,6 +134,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 dispatch(setCredentials({
                     token: newUser.token,
                     username: newUser.user.username,
+                    sunoUsername: newUser.user.sunoUsername,
                     avatar: newUser.user.avatar,
                     _id: newUser.user._id
                 }));

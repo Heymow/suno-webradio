@@ -9,7 +9,7 @@ import Icon from '@mui/material/Icon';
 import AuthModal from "./AuthModal";
 import Profile from "./components/profile";
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated } from './store/authStore';
+import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
 import { useSnackbar } from 'notistack';
 import Avatar from '@mui/material/Avatar';
 import Axios from './utils/Axios';
@@ -17,13 +17,11 @@ import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
-import { style, styled, width } from '@mui/system';
+import { styled } from '@mui/system';
 import { Button as BaseButton, buttonClasses } from '@mui/base/Button';
 import Stack from '@mui/material/Stack';
-import zIndex from "@mui/material/styles/zIndex";
 import { Link } from "@mui/material";
-import { Image } from "@mui/icons-material";
-import { purple } from "@mui/material/colors";
+
 
 // Constants
 const ERROR_MESSAGES = {
@@ -92,6 +90,7 @@ function AppContent() {
 
   const dispatch = useAppDispatch();
   const username = useAppSelector(selectCurrentUser);
+  const sunoUsername = useAppSelector(selectCurrentSunoUsername);
   const userAvatar = useAppSelector(selectCurrentAvatar);
   const userId = useAppSelector(selectCurrentUserId);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -102,7 +101,6 @@ function AppContent() {
 
   // Vérifier la cohérence des données d'authentification au chargement
   useEffect(() => {
-    // Vérifier et réparer les incohérences dans le store (par exemple, authentifié mais sans userId)
     dispatch(validateAndRefreshUserData());
   }, [dispatch]);
 
@@ -351,12 +349,12 @@ function AppContent() {
         </div>
         <div className={styles.topRightButtonsContainer}>
           <div className={styles.userContainer}>
-            {username ? (
+            {isAuthenticated ? (
               <>
-                <span className={styles.username}>{username}</span>
+                <span className={styles.username}>{sunoUsername || username}</span>
                 <Avatar
                   src={userAvatar || undefined}
-                  alt={username}
+                  alt={(sunoUsername || username) || 'User'}
                   sx={{
                     width: 40,
                     height: 40,

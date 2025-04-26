@@ -3,6 +3,7 @@ import { configureStore, createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface AuthState {
     token: string | null;
     username: string | null;
+    sunoUsername: string | null;
     avatar: string | null;
     _id: string | null;
     isAuthenticated: boolean;
@@ -36,6 +37,7 @@ const safelyGetItem = (key: string): string | null => {
 const initialState: AuthState = {
     token: safelyGetItem('accessToken'),
     username: safelyGetItem('username'),
+    sunoUsername: safelyGetItem('sunoUsername'),
     avatar: safelyGetItem('userAvatar'),
     _id: safelyGetItem('userId'),
     isAuthenticated: !!safelyGetItem('accessToken'),
@@ -46,8 +48,8 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setCredentials: (state, action: PayloadAction<{ token: string; username: string; avatar?: string; _id: string; isActivated?: boolean }>) => {
-            const { token, username, avatar, _id, isActivated } = action.payload;
+        setCredentials: (state, action: PayloadAction<{ token: string; username: string; sunoUsername: string; avatar?: string; _id: string; isActivated?: boolean }>) => {
+            const { token, username, sunoUsername, avatar, _id, isActivated } = action.payload;
 
             if (!_id) {
                 console.error("Attention : tentative de définir un userId undefined ou null");
@@ -56,6 +58,7 @@ const authSlice = createSlice({
 
             state.token = token;
             state.username = username;
+            state.sunoUsername = sunoUsername;
             state.avatar = avatar || null;
             state._id = _id;
             state.isActivated = isActivated || false;
@@ -63,6 +66,7 @@ const authSlice = createSlice({
 
             safelyStoreItem('accessToken', token);
             safelyStoreItem('username', username);
+            safelyStoreItem('sunoUsername', sunoUsername || null);
             safelyStoreItem('userAvatar', avatar || null);
             safelyStoreItem('userId', _id);
             safelyStoreItem('isActivated', isActivated ? 'true' : 'false');
@@ -78,6 +82,7 @@ const authSlice = createSlice({
                 // Déconnexion préventive
                 state.token = null;
                 state.username = null;
+                state.sunoUsername = null;
                 state.avatar = null;
                 state._id = null;
                 state.isAuthenticated = false;
@@ -93,6 +98,7 @@ const authSlice = createSlice({
         logout: (state) => {
             state.token = null;
             state.username = null;
+            state.sunoUsername = null;
             state.avatar = null;
             state._id = null;
             state.isAuthenticated = false;
@@ -120,6 +126,7 @@ export const { setCredentials, setAccountActivated, logout, validateAndRefreshUs
 
 // Sélecteurs
 export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.username;
+export const selectCurrentSunoUsername = (state: { auth: AuthState }) => state.auth.sunoUsername;
 export const selectCurrentToken = (state: { auth: AuthState }) => state.auth.token;
 export const selectCurrentAvatar = (state: { auth: AuthState }) => state.auth.avatar;
 export const selectCurrentUserId = (state: { auth: AuthState }) => state.auth._id;
