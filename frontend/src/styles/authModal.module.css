@@ -1,0 +1,249 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+}
+
+.modalContent {
+    background-color: #1e1e1e;
+    width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(37, 29, 185, 0.3);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+
+.modalTitle {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    position: relative;
+    display: inline-block;
+}
+
+.modalTitle::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background-color: #251db9;
+    border-radius: 3px;
+}
+
+.tabs {
+    display: flex;
+    margin: 0;
+    background-color: #242424;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab {
+    padding: 16px 24px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    font-size: 16px;
+    flex: 1;
+    text-align: center;
+}
+
+.tab:focus {
+    outline: none;
+}
+
+.tab.active {
+    color: white;
+    background-color: #1e1e1e;
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #251db9;
+}
+
+.modalBody {
+    padding: 30px;
+    background-color: #1e1e1e;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.input {
+    display: block;
+    width: 100%;
+}
+
+.input :global(.MuiOutlinedInput-root) {
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.input :global(.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline) {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.input :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+    border-color: #251db9;
+}
+
+.input :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+    border-color: #251db9;
+    border-width: 2px;
+    box-shadow: 0 0 0 4px rgba(37, 29, 185, 0.2);
+}
+
+.input :global(.MuiInputBase-input) {
+    color: white;
+    padding: 16px 14px;
+}
+
+.input :global(.MuiFormLabel-root) {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.input :global(.MuiFormLabel-root.Mui-focused) {
+    color: #251db9;
+}
+
+.input :global(.MuiFormHelperText-root) {
+    color: #f44336;
+}
+
+.modalFooter {
+    padding: 20px 30px 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    background-color: #1e1e1e;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.button {
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 12px 28px;
+    font-size: 16px;
+    text-transform: none;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.button.primary {
+    background-color: #251db9;
+    color: white;
+    border: none;
+}
+
+.button.primary:hover {
+    background-color: #1f1ba0;
+    box-shadow: 0 4px 12px rgba(37, 29, 185, 0.4);
+    transform: translateY(-2px);
+}
+
+.button.primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 29, 185, 0.25);
+}
+
+.button.secondary {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.button.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.avatarUpload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px dashed rgba(37, 29, 185, 0.4);
+}
+
+.avatarPreview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #251db9;
+    box-shadow: 0 4px 15px rgba(37, 29, 185, 0.3);
+}
+
+.error {
+    color: #f44336;
+    font-size: 14px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+@media (max-width: 650px) {
+    .modalContent {
+        width: calc(100% - 32px);
+        max-width: 600px;
+        margin: 0 16px;
+    }
+
+    .modalHeader,
+    .modalBody {
+        padding: 20px;
+    }
+
+    .tabs {
+        margin: 0;
+    }
+
+    .tab {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+
+    .modalFooter {
+        padding: 15px 20px 25px;
+    }
+
+    .button {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .modalTitle {
+        font-size: 24px;
+    }
+}

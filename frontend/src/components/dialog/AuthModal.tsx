@@ -8,11 +8,12 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { loginUser, createUser } from './services/user.services';
-import { useAppDispatch } from './store/hooks';
+import { loginUser, createUser } from '../../services/user.services';
+import { useAppDispatch } from '../../store/hooks';
 import { useSnackbar } from 'notistack';
-import { setCredentials } from './store/authStore';
-import { processAvatar } from './services/image.service';
+import { setCredentials } from '../../store/authStore';
+import { processAvatar } from '../../services/image.service';
+import styles from '../../styles/authModal.module.css';
 
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const dispatch = useAppDispatch();
@@ -163,39 +164,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
             onClose={onClose}
             maxWidth="sm"
             fullWidth
+            className={styles.modal}
             slotProps={{
                 paper: {
-                    sx: {
-                        width: '600px',
-                        minHeight: '350px'
-                    }
+                    className: styles.modalContent
                 }
             }}
         >
-            <DialogTitle sx={{ fontSize: '28px', padding: '12px 24px' }}>{tabIndex === 0 ? 'Login' : 'Sign Up'}</DialogTitle>
-            <DialogContent sx={{ padding: '12px 24px' }}>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                    <Tabs value={tabIndex} onChange={handleTabChange} aria-label="auth tabs">
-                        <Tab
-                            sx={{
-                                '&:focus': { outline: 'none' },
-                                fontSize: '18px',
-                                padding: '6px 16px'
-                            }}
-                            label="Login"
-                        />
-                        <Tab
-                            sx={{
-                                '&:focus': { outline: 'none' },
-                                fontSize: '18px',
-                                padding: '6px 16px'
-                            }}
-                            label="Sign Up"
-                        />
-                    </Tabs>
-                </Box>
+
+            <div className={styles.tabs}>
+                <Tabs value={tabIndex} onChange={handleTabChange} aria-label="auth tabs">
+                    <Tab
+                        className={`${styles.tab} ${tabIndex === 0 ? styles.active : ''}`}
+                        label="Login"
+                    />
+                    <Tab
+                        className={`${styles.tab} ${tabIndex === 1 ? styles.active : ''}`}
+                        label="Sign Up"
+                    />
+                </Tabs>
+            </div>
+            <div className={styles.modalBody}>
                 {tabIndex === 0 && (
-                    <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    <Box component="form" className={styles.formGroup}>
                         <TextField
                             label="Email"
                             value={loginEmail}
@@ -205,16 +196,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             }}
                             variant="outlined"
                             fullWidth
-                            sx={{
-                                ...autofillStyles,
-                                '& .MuiInputBase-input': {
-                                    fontSize: '18px',
-                                    padding: '10px 14px',
-                                },
-                                '& .MuiInputLabel-root': {
-                                    fontSize: '18px'
-                                }
-                            }}
+                            className={styles.input}
                             error={!!loginError}
                         />
                         <TextField
@@ -227,34 +209,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             }}
                             variant="outlined"
                             fullWidth
-                            sx={{
-                                ...autofillStyles,
-                                '& .MuiInputBase-input': {
-                                    fontSize: '18px',
-                                    padding: '10px 14px',
-                                },
-                                '& .MuiInputLabel-root': {
-                                    fontSize: '18px'
-                                },
-                                '& .MuiFormHelperText-root': {
-                                    fontSize: '16px',
-                                    marginTop: '2px'
-                                }
-                            }}
+                            className={styles.input}
                             error={!!loginError}
                             helperText={loginError}
                         />
                     </Box>
                 )}
                 {tabIndex === 1 && (
-                    <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <Box component="form" className={styles.formGroup}>
                         <TextField
                             label="Username"
                             value={signUpUsername}
                             onChange={(e) => setSignUpUsername(e.target.value)}
                             variant="outlined"
                             fullWidth
-                            sx={autofillStyles}
+                            className={styles.input}
                             required
                             error={errorSignUpUsername}
                         />
@@ -268,7 +237,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             }}
                             variant="outlined"
                             fullWidth
-                            sx={autofillStyles}
+                            className={styles.input}
                             required
                             error={errorSignUpEmail}
                             helperText={errorSignUpEmail ? "Adresse email invalide" : ""}
@@ -280,7 +249,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             onChange={(e) => setSignUpPassword(e.target.value)}
                             variant="outlined"
                             fullWidth
-                            sx={autofillStyles}
+                            className={styles.input}
                             required
                             error={errorSignUpPassword}
                         />
@@ -291,30 +260,27 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             onChange={(e) => setSignUpConfirmPassword(e.target.value)}
                             variant="outlined"
                             fullWidth
-                            sx={autofillStyles}
+                            className={styles.input}
                             required
                             error={errorSignUpConfirmPassword}
                             helperText={errorSignUpConfirmPassword ? "Les mots de passe ne correspondent pas" : ""}
                         />
-                        <Button variant="outlined" component="label" sx={{ mt: 2 }}>
-                            Upload Avatar
-                            <input type="file" accept="image/" hidden onChange={handleAvatarChange} />
-                        </Button>
-                        {avatarPreview && (
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                                <img src={avatarPreview} alt="Avatar Preview" style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
-                            </Box>
-                        )}
+                        <div className={styles.avatarUpload}>
+                            <Button variant="outlined" component="label" className={`${styles.button} ${styles.secondary}`}>
+                                Upload Avatar
+                                <input type="file" accept="image/" hidden onChange={handleAvatarChange} />
+                            </Button>
+                            {avatarPreview && (
+                                <img src={avatarPreview} alt="Avatar Preview" className={styles.avatarPreview} />
+                            )}
+                        </div>
                     </Box>
                 )}
-            </DialogContent>
-            <DialogActions sx={{ padding: '12px 24px' }}>
+            </div>
+            <div className={styles.modalFooter}>
                 <Button
                     onClick={onClose}
-                    sx={{
-                        fontSize: '18px',
-                        padding: '6px 20px'
-                    }}
+                    className={`${styles.button} ${styles.secondary}`}
                 >
                     Cancel
                 </Button>
@@ -322,14 +288,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     <Button
                         variant="contained"
                         onClick={handleLogin}
-                        sx={{
-                            backgroundColor: "#251db9",
-                            color: "white",
-                            '&:hover': { backgroundColor: "#1f1ba0" },
-                            '&:focus': { outline: 'none', boxShadow: 'none', border: 'none' },
-                            fontSize: '18px',
-                            padding: '6px 20px'
-                        }}
+                        className={`${styles.button} ${styles.primary}`}
                     >
                         Login
                     </Button>
@@ -337,19 +296,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     <Button
                         variant="contained"
                         onClick={handleSignUpValidated}
-                        sx={{
-                            backgroundColor: "#251db9",
-                            color: "white",
-                            '&:hover': { backgroundColor: "#1f1ba0" },
-                            '&:focus': { outline: 'none', boxShadow: 'none', border: 'none' },
-                            fontSize: '18px',
-                            padding: '6px 20px'
-                        }}
+                        className={`${styles.button} ${styles.primary}`}
                     >
                         Sign Up
                     </Button>
                 )}
-            </DialogActions>
+            </div>
         </Dialog>
     );
 };
