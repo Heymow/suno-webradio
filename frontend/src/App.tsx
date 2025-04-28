@@ -7,7 +7,7 @@ import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Icon from '@mui/material/Icon';
 import AuthModal from "./AuthModal";
-import Profile from "./components/profile";
+import Profile from "./components/Profile";
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
 import { useSnackbar } from 'notistack';

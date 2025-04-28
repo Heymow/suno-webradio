@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { store } from '../store/authStore';
-import { selectCurrentToken, setCredentials } from '../store/authStore';
+import { selectCurrentToken, setCredentials, logout } from '../store/authStore';
 import { refreshAccessToken } from '../services/user.services';
 
 // Création de l'instance Axios avec l'URL de base et les headers par défaut
@@ -55,7 +55,10 @@ Axios.interceptors.response.use(
                         originalRequest.headers.Authorization = `Bearer ${token}`;
                         return Axios(originalRequest);
                     })
-                    .catch(err => Promise.reject(err));
+                    .catch(err => {
+                        store.dispatch(logout());
+                        return Promise.reject(err);
+                    });
             }
 
             originalRequest._retry = true;
@@ -67,16 +70,20 @@ Axios.interceptors.response.use(
                     store.dispatch(setCredentials({
                         token: response.token,
                         username: response.user.username,
+                        sunoUsername: response.user.sunoUsername || '',
                         avatar: response.user.avatar,
-                        _id: response.user._id
+                        _id: response.user.id
                     }));
 
-                    Axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
                     processQueue(null, response.token);
                     return Axios(originalRequest);
+                } else {
+                    store.dispatch(logout());
+                    return Promise.reject(error);
                 }
             } catch (refreshError) {
                 processQueue(refreshError, null);
+                store.dispatch(logout());
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
