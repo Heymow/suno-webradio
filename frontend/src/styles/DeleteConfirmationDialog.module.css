@@ -1,0 +1,32 @@
+.dialog {
+    z-index: 1300 !important;
+}
+
+.dialog :global(.MuiBackdrop-root) {
+    background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.paper {
+    background-color: #0a0a0a !important;
+    color: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.title {
+    color: white !important;
+    font-weight: 500 !important;
+}
+
+.content {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.cancelButton {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.deleteButton {
+    color: #f44336 !important;
+}
