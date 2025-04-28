@@ -100,7 +100,9 @@
 }
 
 .logoutButton:hover {
-    background-color: rgba(244, 67, 54, 0.1) !important;
+    background-color: none;
+    border-radius: 8px;
+    width: 80%;
 }
 
 .iconColor {

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, Avatar, Typography, List, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton, Button, Box, Tooltip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import HistoryIcon from '@mui/icons-material/History';
-import ReportIcon from '@mui/icons-material/Report';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LogoutIcon from '@mui/icons-material/Logout';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, selectIsAuthenticated, selectIsActivated, logout, validateAndRefreshUserData } from '../store/authStore';
 import ActivateAccountDialog from './dialog/activateAccount';
@@ -15,6 +15,7 @@ import styles from '../styles/Profile.module.css';
 import Axios from '../utils/Axios';
 import ProfileDetails from './ProfileDetails';
 import MyMusicSent from './MyMusicSent';
+import Analyse from './Analyse';
 
 interface ProfileProps {
     open: boolean;
@@ -25,6 +26,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     const [activateDialogOpen, setActivateDialogOpen] = useState(false);
     const [showProfileDetails, setShowProfileDetails] = useState(false);
     const [showMusicSent, setShowMusicSent] = useState(false);
+    const [showAnalyse, setShowAnalyse] = useState(false);
     const [pulsifyId, setPulsifyId] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
 
@@ -96,6 +98,14 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
 
     const handleCloseMusicSent = () => {
         setShowMusicSent(false);
+    };
+
+    const handleAnalyseClick = () => {
+        setShowAnalyse(true);
+    };
+
+    const handleCloseAnalyse = () => {
+        setShowAnalyse(false);
     };
 
     return (
@@ -182,11 +192,11 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                                         </ListItemIcon>
                                         <ListItemText primary="My music sent" />
                                     </ListItemButton>
-                                    <ListItemButton className={styles.listItemButton}>
+                                    <ListItemButton className={styles.listItemButton} onClick={handleAnalyseClick}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                                            <ReportIcon className={styles.iconColor} />
+                                            <AnalyticsIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="Reports" />
+                                        <ListItemText primary="Analyse" />
                                     </ListItemButton>
                                     <ListItemButton className={styles.listItemButton}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
@@ -271,6 +281,31 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                         <ArrowForwardIcon />
                     </IconButton>
                     <MyMusicSent />
+                </Box>
+            </Drawer>
+
+            <Drawer
+                anchor="right"
+                open={showAnalyse}
+                onClose={handleCloseAnalyse}
+                PaperProps={{
+                    sx: {
+                        width: '400px',
+                        backgroundColor: '#080821',
+                        borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: 'white'
+                    }
+                }}
+                transitionDuration={300}
+            >
+                <Box className={styles.contentWrapper}>
+                    <IconButton
+                        onClick={handleCloseAnalyse}
+                        className={styles.backBtn}
+                    >
+                        <ArrowForwardIcon />
+                    </IconButton>
+                    <Analyse />
                 </Box>
             </Drawer>
         </>

@@ -1,0 +1,318 @@
+.container {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.title {
+    color: white;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+}
+
+.songsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    flex: 1;
+    margin-top: 30px;
+    padding: 0 10px;
+}
+
+.songCard {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cardContent {
+    display: flex;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.songImageContainer {
+    width: 100px;
+    height: 100px;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.songImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.songInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.songHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.songTitleContainer {
+    flex: 1;
+    min-width: 0;
+}
+
+.songTitle {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    word-wrap: break-word;
+}
+
+.songAuthor {
+    color: #666;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.songActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.expandButton {
+    color: #666;
+    padding: 0.25rem;
+
+}
+
+.expendButton:focus {
+    border: 10px solid red;
+}
+
+.expandButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.deleteButton {
+    color: #666;
+    padding: 0.25rem;
+}
+
+.deleteButton:hover {
+    color: #ff4444;
+    background-color: none;
+}
+
+.songBasicInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.songDate {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.songStats {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.songStat {
+    color: #666;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.songDetails {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.songPrompt {
+    color: #444;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+}
+
+.songNegative {
+    color: #666;
+    font-size: 0.85rem;
+    font-style: italic;
+    word-wrap: break-word;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.errorContainer {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.addButton {
+    margin-top: 20px;
+    color: white;
+    border-color: white;
+    width: 100%;
+    padding: 12px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.addButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+.placeholderCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 120px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+.placeholderText {
+    color: #888888;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.placeholderSubtext {
+    color: #666666;
+    font-size: 0.8rem;
+}
+
+.addSongContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.inputSunoLinkContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+}
+
+.inputSunoLink {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.9rem;
+}
+
+.plusButton {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #251db9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+    padding-bottom: 2px;
+    position: relative;
+}
+
+.plusButton::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+.plusButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.openPlusButton {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #251db9;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+    flex-shrink: 0;
+    line-height: 1;
+    padding-bottom: 2px;
+    position: relative;
+}
+
+.openPlusButton::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+.explanatoryText {
+    color: #888888;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
