@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stack, IconButton } from '@mui/material';
 import { useAppSelector } from '../store/hooks';
 import { selectCurrentUserId } from '../store/authStore';
-import styles from '../styles/ProfileDetails.module.css';
+import styles from '../styles/MyMusicSent.module.css';
 import Axios from '../utils/Axios';
 import LightSunoCard from '../LightSunoCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
+import DeleteConfirmationDialog from './dialog/DeleteConfirmationDialog';
 
 const MyMusicSent = () => {
     const [songs, setSongs] = useState<SunoSong[]>([]);
     const [sunoLink, setSunoLink] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+    const [songToDelete, setSongToDelete] = useState<SunoSong | null>(null);
     const userId = useAppSelector(selectCurrentUserId);
     const { enqueueSnackbar } = useSnackbar();
 
@@ -79,15 +82,30 @@ const MyMusicSent = () => {
         }
     };
 
-    const handleDeleteSong = async (songId: string) => {
+    const handleDeleteClick = (song: SunoSong) => {
+        setSongToDelete(song);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!songToDelete) return;
+
         try {
-            await Axios.delete(`/songs/${songId}`);
-            setSongs(songs.filter(song => song.id !== songId));
-            enqueueSnackbar('Song deleted successfully', { variant: 'success' });
+            await Axios.delete(`/users/${userId}/my-music-sent/${songToDelete.id}`);
+            setSongs(songs.filter(song => song.id !== songToDelete.id));
+            enqueueSnackbar('Musique supprimée avec succès', { variant: 'success' });
         } catch (error) {
             console.error("Error deleting song:", error);
-            enqueueSnackbar('Error deleting the song', { variant: 'error' });
+            enqueueSnackbar('Erreur lors de la suppression de la musique', { variant: 'error' });
+        } finally {
+            setDeleteDialogOpen(false);
+            setSongToDelete(null);
         }
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setSongToDelete(null);
     };
 
     let sunoLinkContainer = clickedPlusButton ? (
@@ -129,14 +147,12 @@ const MyMusicSent = () => {
                                     {song ? (
                                         <Box className={styles.usedSlotCard}>
                                             <Box className={styles.songCardContainer}>
-                                                <Box className={styles.cardAndDelete}>
-                                                    <LightSunoCard {...song} />
-                                                    <IconButton
-                                                        className={styles.deleteButton}
-                                                        onClick={() => handleDeleteSong(song.id)}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
+                                                <Box className={styles.lightSunoCardWrapper}>
+                                                    <LightSunoCard
+                                                        {...song}
+                                                        playCount={song.playCount}
+                                                        upVoteCount={song.upVoteCount}
+                                                    />
                                                 </Box>
                                                 <Box className={styles.radioStats}>
                                                     <Typography variant="body2" className={styles.statItem}>
@@ -151,6 +167,14 @@ const MyMusicSent = () => {
                                                         <span className={styles.statLabel}>Next Play:</span>
                                                         <span className={styles.statValue}>{song.timeUntilPlay || "Coming soon"}</span>
                                                     </Typography>
+                                                </Box>
+                                                <Box className={styles.deleteButtonContainer}>
+                                                    <IconButton
+                                                        className={styles.deleteButton}
+                                                        onClick={() => handleDeleteClick(song)}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
                                                 </Box>
                                             </Box>
                                         </Box>
@@ -177,6 +201,12 @@ const MyMusicSent = () => {
                     </Box>
                 </Stack>
             </Box>
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title={songToDelete?.name || ''}
+            />
         </div>
     );
 };
