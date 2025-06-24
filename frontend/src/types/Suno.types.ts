@@ -1,5 +1,8 @@
+// Type pour ObjectId MongoDB sans dépendance mongoose
+type ObjectId = string;
+
 interface SunoSong {
-    id: string;
+    _id: ObjectId;
     name: string;
     author: string;
     prompt: string;

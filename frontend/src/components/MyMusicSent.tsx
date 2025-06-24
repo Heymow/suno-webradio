@@ -8,6 +8,15 @@ import LightSunoCard from '../LightSunoCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import DeleteConfirmationDialog from './dialog/DeleteConfirmationDialog';
+import { submitSunoLink } from '../services/suno.services';
+
+// Constants
+const ERROR_MESSAGES = {
+    INVALID_LINK: 'Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...',
+    EMPTY_LINK: 'Veuillez entrer un lien Suno'
+};
+
+const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
 
 const MyMusicSent = () => {
     const [songs, setSongs] = useState<SunoSong[]>([]);
@@ -18,8 +27,6 @@ const MyMusicSent = () => {
     const [songToDelete, setSongToDelete] = useState<SunoSong | null>(null);
     const userId = useAppSelector(selectCurrentUserId);
     const { enqueueSnackbar } = useSnackbar();
-
-    const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
 
     useEffect(() => {
         const fetchUserSongs = async () => {
@@ -46,18 +53,21 @@ const MyMusicSent = () => {
         setSunoLink(newLink);
 
         if (newLink && !validateSunoLink(newLink)) {
-            enqueueSnackbar('Invalid Suno link format', { variant: 'error' });
+            enqueueSnackbar(ERROR_MESSAGES.INVALID_LINK, {
+                variant: 'error',
+                preventDuplicate: true
+            });
         }
     };
 
     const handleSubmitSong = async () => {
         if (!sunoLink) {
-            enqueueSnackbar('Please enter a Suno link', { variant: 'warning' });
+            enqueueSnackbar(ERROR_MESSAGES.EMPTY_LINK, { variant: 'warning' });
             return;
         }
 
         if (!validateSunoLink(sunoLink)) {
-            enqueueSnackbar('Invalid Suno link format', { variant: 'error' });
+            enqueueSnackbar(ERROR_MESSAGES.INVALID_LINK, { variant: 'error' });
             return;
         }
 
@@ -65,16 +75,16 @@ const MyMusicSent = () => {
 
         setIsSubmitting(true);
         try {
-            await Axios.post('/songs', { sunoLink });
+            await submitSunoLink(sunoLink);
             setSunoLink("");
             setClickedPlusButton(false);
-            enqueueSnackbar('Song added successfully!', { variant: 'success' });
+            enqueueSnackbar('Musique ajoutée avec succès !', { variant: 'success' });
             // Refresh songs list
-            const response = await Axios.get(`/users/${userId}/songs`);
+            const response = await Axios.get(`/users/${userId}/my-music-sent`);
             setSongs(response.data);
         } catch (error: any) {
             enqueueSnackbar(
-                error.response?.data?.message || 'Error adding the song',
+                error.response?.data?.message || 'Erreur lors de l\'ajout de la musique',
                 { variant: 'error' }
             );
         } finally {
@@ -91,8 +101,8 @@ const MyMusicSent = () => {
         if (!songToDelete) return;
 
         try {
-            await Axios.delete(`/users/${userId}/my-music-sent/${songToDelete.id}`);
-            setSongs(songs.filter(song => song.id !== songToDelete.id));
+            await Axios.delete(`/users/${userId}/my-music-sent/${songToDelete._id}`);
+            setSongs(songs.filter(song => song._id !== songToDelete._id));
             enqueueSnackbar('Musique supprimée avec succès', { variant: 'success' });
         } catch (error) {
             console.error("Error deleting song:", error);
@@ -111,7 +121,7 @@ const MyMusicSent = () => {
     let sunoLinkContainer = clickedPlusButton ? (
         <div className={styles.inputSunoLinkContainer}>
             <input
-                placeholder="Paste your Suno link here..."
+                placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
                 className={styles.inputSunoLink}
                 onChange={handleInputChange}
                 value={sunoLink}
@@ -196,7 +206,7 @@ const MyMusicSent = () => {
                     <Box className={styles.addSongContainer}>
                         {sunoLinkContainer}
                         <div className={styles.explanatoryText}>
-                            {!clickedPlusButton ? "Add a song" : "Paste your Suno link"}
+                            {!clickedPlusButton ? "Add a song to the playlist 'New'" : ""}
                         </div>
                     </Box>
                 </Stack>

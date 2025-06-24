@@ -165,7 +165,7 @@ const Analyse: React.FC = () => {
     let sunoLinkContainer = clickedPlusButton ? (
         <div className={styles.inputSunoLinkContainer}>
             <input
-                placeholder="Paste your Suno link here..."
+                placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
                 className={styles.inputSunoLink}
                 onChange={handleInputChange}
                 value={sunoLink}

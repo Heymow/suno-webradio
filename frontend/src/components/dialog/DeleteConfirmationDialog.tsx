@@ -62,7 +62,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                     }}
                 >
                     <Typography style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-                        Êtes-vous sûr de vouloir supprimer "<span style={{ fontWeight: 600 }}>{title}</span>" ? Cette action est irréversible.
+                        Are you sure you want to delete "<span style={{ fontWeight: 600 }}>{title}</span>" ? This action will suppress the song from the playlist its played in.
                     </Typography>
                 </div>
                 <div

@@ -61,7 +61,7 @@ const convertToSunoSong = (data: any): SunoSong => {
   }
 
   const song = {
-    id: data.id,
+    _id: data.id,
     name: data.name,
     author: data.writer,
     songImage: data.img,
@@ -319,7 +319,7 @@ function AppContent() {
     <div className={styles.inputSunoLinkContainer}>
       <p style={{ fontWeight: 400, fontSize: "15px" }}>Submit :</p>
       <input
-        placeholder="Paste your Suno song link here..."
+        placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
         className={styles.inputSunoLink}
         onChange={handleInputChange}
         value={sunoLink}
