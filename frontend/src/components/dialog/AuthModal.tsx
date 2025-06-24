@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -14,13 +11,34 @@ import { useSnackbar } from 'notistack';
 import { setCredentials } from '../../store/authStore';
 import { processAvatar } from '../../services/image.service';
 import styles from '../../styles/authModal.module.css';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const dispatch = useAppDispatch();
     const { enqueueSnackbar: snackBar } = useSnackbar();
     const [tabIndex, setTabIndex] = useState(0);
+    const [formVisible, setFormVisible] = useState(false);
+
+    // Effet pour l'animation d'entrée du formulaire
+    useEffect(() => {
+        if (open) {
+            const timer = setTimeout(() => {
+                setFormVisible(true);
+            }, 300);
+            return () => clearTimeout(timer);
+        } else {
+            setFormVisible(false);
+        }
+    }, [open, tabIndex]);
+
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setTabIndex(newValue);
+        setFormVisible(false);
+        setTimeout(() => {
+            setTabIndex(newValue);
+            setFormVisible(true);
+        }, 300);
     };
 
     // États pour les champs d'inscription
@@ -158,11 +176,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
         },
     };
 
+    const handleClose = () => {
+        setFormVisible(false);
+        setTimeout(() => {
+            onClose();
+        }, 200);
+    };
+
+    const iconStyle = {
+        fontSize: '22px',
+        marginRight: '8px'
+    };
+
     return (
         <Dialog
             open={open}
-            onClose={onClose}
-            maxWidth="sm"
+            onClose={handleClose}
+            maxWidth="md"
             fullWidth
             className={styles.modal}
             slotProps={{
@@ -171,22 +201,34 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 }
             }}
         >
-
             <div className={styles.tabs}>
-                <Tabs value={tabIndex} onChange={handleTabChange} aria-label="auth tabs">
+                <Tabs value={tabIndex} onChange={handleTabChange} aria-label="auth tabs"
+                    sx={{
+                        width: '100%',
+                        '& .MuiTabs-indicator': { display: 'none' }
+                    }}
+                >
                     <Tab
-                        className={`${styles.tab} ${tabIndex === 0 ? styles.active : ''}`}
-                        label="Login"
+                        className={`${styles.tab} ${tabIndex === 0 ? styles.active : ''} ${styles.loginTab}`}
+                        label={<span style={{ color: tabIndex === 0 ? '#fff' : '#6e64ff' }}>Se connecter</span>}
+                        icon={<LoginIcon sx={{ fontSize: '24px', color: tabIndex === 0 ? '#fff' : '#6e64ff' }} />}
+                        iconPosition="start"
                     />
                     <Tab
-                        className={`${styles.tab} ${tabIndex === 1 ? styles.active : ''}`}
-                        label="Sign Up"
+                        className={`${styles.tab} ${tabIndex === 1 ? styles.active : ''} ${styles.signUpTab}`}
+                        label={<span style={{ color: tabIndex === 1 ? '#fff' : '#8B80FF' }}>S'inscrire</span>}
+                        icon={<PersonAddIcon sx={{ fontSize: '24px', color: tabIndex === 1 ? '#fff' : '#8B80FF' }} />}
+                        iconPosition="start"
                     />
                 </Tabs>
             </div>
             <div className={styles.modalBody}>
                 {tabIndex === 0 && (
-                    <Box component="form" className={styles.formGroup}>
+                    <Box
+                        component="form"
+                        className={`${styles.formGroup} ${formVisible ? styles.formVisible : ''}`}
+                        sx={{ opacity: formVisible ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
+                    >
                         <TextField
                             label="Email"
                             value={loginEmail}
@@ -200,7 +242,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             error={!!loginError}
                         />
                         <TextField
-                            label="Password"
+                            label="Mot de passe"
                             type="password"
                             value={loginPassword}
                             onChange={(e) => {
@@ -216,9 +258,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     </Box>
                 )}
                 {tabIndex === 1 && (
-                    <Box component="form" className={styles.formGroup}>
+                    <Box
+                        component="form"
+                        className={`${styles.formGroup} ${formVisible ? styles.formVisible : ''}`}
+                        sx={{ opacity: formVisible ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
+                    >
                         <TextField
-                            label="Username"
+                            label="Nom d'utilisateur"
                             value={signUpUsername}
                             onChange={(e) => setSignUpUsername(e.target.value)}
                             variant="outlined"
@@ -233,7 +279,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             onChange={(e) => {
                                 setSignUpEmail(e.target.value);
                                 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                                setErrorSignUpEmail(!emailRegex.test(e.target.value));
+                                setErrorSignUpEmail(!emailRegex.test(e.target.value) && e.target.value !== '');
                             }}
                             variant="outlined"
                             fullWidth
@@ -243,7 +289,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             helperText={errorSignUpEmail ? "Adresse email invalide" : ""}
                         />
                         <TextField
-                            label="Password"
+                            label="Mot de passe"
                             type="password"
                             value={signUpPassword}
                             onChange={(e) => setSignUpPassword(e.target.value)}
@@ -254,7 +300,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             error={errorSignUpPassword}
                         />
                         <TextField
-                            label="Confirm Password"
+                            label="Confirmer le mot de passe"
                             type="password"
                             value={signUpConfirmPassword}
                             onChange={(e) => setSignUpConfirmPassword(e.target.value)}
@@ -266,12 +312,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             helperText={errorSignUpConfirmPassword ? "Les mots de passe ne correspondent pas" : ""}
                         />
                         <div className={styles.avatarUpload}>
-                            <Button variant="outlined" component="label" className={`${styles.button} ${styles.secondary}`}>
-                                Upload Avatar
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                className={`${styles.button} ${styles.secondary}`}
+                                startIcon={<CloudUploadIcon sx={{ fontSize: '24px' }} />}
+                                size="large"
+                            >
+                                Choisir un avatar
                                 <input type="file" accept="image/" hidden onChange={handleAvatarChange} />
                             </Button>
-                            {avatarPreview && (
+                            {avatarPreview ? (
                                 <img src={avatarPreview} alt="Avatar Preview" className={styles.avatarPreview} />
+                            ) : (
+                                <div className={styles.avatarPlaceholder}>
+                                    <PersonAddIcon sx={{ fontSize: 70, color: 'rgba(255,255,255,0.2)' }} />
+                                </div>
                             )}
                         </div>
                     </Box>
@@ -279,26 +335,31 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
             </div>
             <div className={styles.modalFooter}>
                 <Button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className={`${styles.button} ${styles.secondary}`}
+                    size="large"
                 >
-                    Cancel
+                    Annuler
                 </Button>
                 {tabIndex === 0 ? (
                     <Button
                         variant="contained"
                         onClick={handleLogin}
                         className={`${styles.button} ${styles.primary}`}
+                        startIcon={<LoginIcon sx={{ fontSize: '24px' }} />}
+                        size="large"
                     >
-                        Login
+                        Se connecter
                     </Button>
                 ) : (
                     <Button
                         variant="contained"
                         onClick={handleSignUpValidated}
                         className={`${styles.button} ${styles.primary}`}
+                        startIcon={<PersonAddIcon sx={{ fontSize: '24px' }} />}
+                        size="large"
                     >
-                        Sign Up
+                        S'inscrire
                     </Button>
                 )}
             </div>

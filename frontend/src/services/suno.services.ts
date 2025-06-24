@@ -20,3 +20,15 @@ export const submitSunoLink = async (sunoLink: string) => {
         throw error;
     }
 }
+
+export const getSunoTrendingSongs = async (list: string, timeSpan: string) => {
+    try {
+        const response = await Axios.get(`/suno-api/trending/${list}/${timeSpan}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error while fetching trending songs:", error);
+        return null;
+    }
+}
+
+

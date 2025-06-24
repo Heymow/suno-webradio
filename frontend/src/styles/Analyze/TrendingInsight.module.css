@@ -5,6 +5,7 @@ html {
     padding: 0;
     height: 100%;
     width: 100%;
+
 }
 
 .analyseContainer {
@@ -82,18 +83,11 @@ html {
 
 .mainContent {
     display: flex;
-    height: calc(100vh - 210px);
+
     padding: 1rem;
     overflow: hidden;
     box-sizing: border-box;
     max-width: 100vw;
-}
-
-.contentWrapper {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    max-width: calc(100vw - 350px);
 }
 
 .leftSidebar {
@@ -156,6 +150,7 @@ html {
     padding: 0 1rem;
     overflow-y: auto;
     overflow-x: hidden;
+
     background-color: #0c0c24;
 }
 
@@ -242,6 +237,7 @@ html {
     display: none;
     width: 100%;
     border-collapse: collapse;
+
 }
 
 .songsTable th {

@@ -15,7 +15,6 @@ import styles from '../styles/Profile.module.css';
 import Axios from '../utils/Axios';
 import ProfileDetails from './ProfileDetails';
 import MyMusicSent from './MyMusicSent';
-import Analyse from './Analyse';
 
 interface ProfileProps {
     open: boolean;
@@ -190,19 +189,25 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <HistoryIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="My music sent" />
+                                        <ListItemText primary="Submitted songs" />
                                     </ListItemButton>
                                     <ListItemButton className={styles.listItemButton} onClick={handleAnalyseClick}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <AnalyticsIcon className={styles.iconColor} />
                                         </ListItemIcon>
-                                        <ListItemText primary="Analyse" />
+                                        <ListItemText primary="Watched songs " />
                                     </ListItemButton>
                                     <ListItemButton className={styles.listItemButton}>
                                         <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
                                             <SettingsIcon className={styles.iconColor} />
                                         </ListItemIcon>
                                         <ListItemText primary="Settings" />
+                                    </ListItemButton>
+                                    <ListItemButton className={styles.listItemButton}>
+                                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                                            <SettingsIcon className={styles.iconColor} />
+                                        </ListItemIcon>
+                                        <ListItemText primary="About" />
                                     </ListItemButton>
                                 </List>
                             </div>
@@ -305,7 +310,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                     >
                         <ArrowForwardIcon />
                     </IconButton>
-                    <Analyse />
+
                 </Box>
             </Drawer>
         </>

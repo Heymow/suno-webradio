@@ -5,9 +5,11 @@ import styles from "./styles/App.module.css";
 import SunoProjectCard from "./SunoProjectCard";
 import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import Icon from '@mui/material/Icon';
 import AuthModal from "./components/dialog/AuthModal";
 import Profile from "./components/Profile";
+import Analyse from "./pages/Analyse";
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
 import { useSnackbar } from 'notistack';
@@ -86,6 +88,7 @@ function AppContent() {
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
+  const [showAnalyse, setShowAnalyse] = useState<boolean>(false);
   const { enqueueSnackbar: snackBar } = useSnackbar();
 
   const dispatch = useAppDispatch();
@@ -114,7 +117,7 @@ function AppContent() {
     const checkActivationStatus = async () => {
       if (userId && isAuthenticated) {
         try {
-          const response = await Axios.get(`/users/activation-status/${userId}`);
+          const response = await Axios.get(`/users/${userId}/activation-status`);
           const isActivated = response.data.isActivated;
           dispatch(setAccountActivated(isActivated));
         } catch (error) {
@@ -308,6 +311,10 @@ function AppContent() {
     setProfileOpen(false);
   };
 
+  const handleAnalyseToggle = () => {
+    setShowAnalyse(!showAnalyse);
+  };
+
   let sunoLinkContainer = clickedPlusButton ? (
     <div className={styles.inputSunoLinkContainer}>
       <p style={{ fontWeight: 400, fontSize: "15px" }}>Submit :</p>
@@ -327,6 +334,36 @@ function AppContent() {
       onClick={() => setClickedPlusButton(true)}
     > + </button>;
 
+  // Conditionally render main content or Analyse page
+  const renderContent = () => {
+    if (showAnalyse) {
+      return <Analyse onBack={handleAnalyseToggle} />;
+    }
+
+    return (
+      <>
+        <div className={styles.content}>
+          {currentTrack ? (
+            <div className={styles.projectCardContainer}>
+              <button className={styles.directButton}>Live</button>
+              <SunoProjectCard {...currentTrack} />
+            </div>
+          ) : (
+            <div className={styles.cardContainer}>
+              Awaiting Radio...
+            </div>
+          )}
+        </div>
+        <div className={styles.previousAndNextSongsContainer}>
+          {previousTrack && <LightSunoCard {...previousTrack} />}
+          <button className={styles.previousSongText}>← Prev Song</button>
+          <button className={styles.nextSongText}>Next Song →</button>
+          {nextTrack && <LightSunoCard {...nextTrack} />}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className={styles.wrapper}>
       <header className={styles.header}>
@@ -334,6 +371,13 @@ function AppContent() {
         <Stack spacing={1} direction="row">
           <Button className={styles.button}>Hits</Button>
           <Button className={styles.button}>New</Button>
+          <Button
+            className={`${styles.button} ${showAnalyse ? styles.active : ''}`}
+            onClick={handleAnalyseToggle}
+          >
+            <BarChartIcon fontSize="small" style={{ marginRight: '5px' }} />
+            Analyse
+          </Button>
         </Stack>
         <p className={styles.dropdown}>
           <Dropdown>
@@ -341,6 +385,7 @@ function AppContent() {
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem>Hits</MenuItem>
               <MenuItem>New</MenuItem>
+              <MenuItem onClick={handleAnalyseToggle}>Analyse</MenuItem>
             </Menu>
           </Dropdown>
         </p>
@@ -389,24 +434,7 @@ function AppContent() {
         </div>
       </header>
 
-      <div className={styles.content}>
-        {currentTrack ? (
-          <div className={styles.projectCardContainer}>
-            <button className={styles.directButton}>Live</button>
-            <SunoProjectCard {...currentTrack} />
-          </div>
-        ) : (
-          <div className={styles.cardContainer}>
-            Awaiting Radio...
-          </div>
-        )}
-      </div>
-      <div className={styles.previousAndNextSongsContainer}>
-        {previousTrack && <LightSunoCard {...previousTrack} />}
-        <button className={styles.previousSongText}>← Prev Song</button>
-        <button className={styles.nextSongText}>Next Song →</button>
-        {nextTrack && <LightSunoCard {...nextTrack} />}
-      </div>
+      {renderContent()}
 
       <footer className={styles.footer}>
         <div className={styles.footerLeftContainer}>
