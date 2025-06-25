@@ -23,6 +23,7 @@ import { styled } from '@mui/system';
 import { Button as BaseButton, buttonClasses } from '@mui/base/Button';
 import Stack from '@mui/material/Stack';
 import { Link } from "@mui/material";
+import { isFeatureEnabled } from './config/features';
 
 
 // Constants
@@ -72,8 +73,14 @@ const convertToSunoSong = (data: any): SunoSong => {
     avatarImage: data.avatarImage || "",
     playCount: data.playCount || 0,
     upVoteCount: data.upVoteCount || 0,
+    radioVoteCount: data.radioVoteCount || 0,
+    radioPlayCount: data.radioPlayCount || 0,
+    playlistPlays: data.playlistPlays || { hits: 0, new: 0 },
     modelVersion: data.modelVersion || "",
-    lyrics: data.lyrics || ""
+    lyrics: data.lyrics || "",
+    // Ajouter les propriétés SSE importantes
+    elapsed: data.elapsed,
+    isTrackChange: data.isTrackChange || false,
   };
 
   return song;
@@ -141,9 +148,75 @@ function AppContent() {
 
     const handleTrackUpdate = (data: any) => {
       if (!data || !isMounted) return;
+      console.log('SSE Data received:', {
+        isTrackChange: data.isTrackChange,
+        isCountersUpdate: data.isCountersUpdate,
+        elapsed: data.elapsed,
+        id: data.id,
+        currentTrackId: currentTrackRef.current?._id,
+        radioVoteCount: data.radioVoteCount,
+        radioPlayCount: data.radioPlayCount
+      });
+
       const sunoSong = convertToSunoSong(data);
-      if (currentTrack?.audio != sunoSong.audio) {
+
+      // Si c'est une mise à jour de compteurs seulement (après vote)
+      if (data.isCountersUpdate && currentTrack?._id === sunoSong._id) {
+        console.log('Counters update only - updating without affecting audio');
+        setCurrentTrack(prev => prev ? {
+          ...prev,
+          radioVoteCount: sunoSong.radioVoteCount,
+          radioPlayCount: sunoSong.radioPlayCount,
+          playCount: sunoSong.playCount,
+          upVoteCount: sunoSong.upVoteCount,
+          // Ne pas toucher à elapsed pour éviter les bugs audio
+          isTrackChange: false
+        } : null);
+        return;
+      }
+
+      // Si c'est un changement de piste ou si c'est une nouvelle chanson
+      if (data.isTrackChange || currentTrack?.audio !== sunoSong.audio) {
+        console.log('Setting new track:', data.isTrackChange ? 'Track change' : 'New audio URL');
         setCurrentTrack(sunoSong);
+      } else if (currentTrack?._id === sunoSong._id) {
+        // Mise à jour des données de la même chanson - éviter les re-renders inutiles de AudioPlayer
+        // Mettre à jour seulement si il y a des changements significatifs (pas juste elapsed)
+        const hasSignificantChanges =
+          currentTrack.radioVoteCount !== sunoSong.radioVoteCount ||
+          currentTrack.radioPlayCount !== sunoSong.radioPlayCount ||
+          currentTrack.playCount !== sunoSong.playCount ||
+          currentTrack.upVoteCount !== sunoSong.upVoteCount;
+
+        if (hasSignificantChanges) {
+          console.log('Updating same track data with significant changes (counters)');
+          setCurrentTrack(prev => prev ? {
+            ...prev,
+            radioVoteCount: sunoSong.radioVoteCount,
+            radioPlayCount: sunoSong.radioPlayCount,
+            playCount: sunoSong.playCount,
+            upVoteCount: sunoSong.upVoteCount,
+            elapsed: data.elapsed,
+            isTrackChange: false
+          } : null);
+        } else {
+          // Mise à jour silencieuse de elapsed sans re-render complet
+          // Ajouter une protection contre les mises à jour trop fréquentes
+          if (currentTrackRef.current && data.elapsed !== undefined) {
+            const lastElapsed = currentTrackRef.current.elapsed || 0;
+            const elapsedDiff = Math.abs(data.elapsed - lastElapsed);
+
+            // Mettre à jour seulement si la différence est significative (> 5 secondes)
+            // ou si c'est la première mise à jour
+            if (elapsedDiff > 5 || lastElapsed === 0) {
+              currentTrackRef.current = {
+                ...currentTrackRef.current,
+                elapsed: data.elapsed
+              };
+              console.log('Silent elapsed update:', data.elapsed, `(diff: ${elapsedDiff}s)`);
+            }
+          }
+        }
       }
 
       if (data.previousTrack) {
@@ -317,7 +390,7 @@ function AppContent() {
 
   let sunoLinkContainer = clickedPlusButton ? (
     <div className={styles.inputSunoLinkContainer}>
-      <p style={{ fontWeight: 400, fontSize: "15px" }}>Submit :</p>
+      <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0, fontSize: "14px" }}>Submit:</p>
       <input
         placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
         className={styles.inputSunoLink}
@@ -328,11 +401,22 @@ function AppContent() {
         className={styles.plusButton}
         onClick={handleSubmitSong}
         disabled={isSubmitting}
-      > + </button>
-    </div>) : <button
+        title="Add song"
+      >
+        <span className={styles.plusSymbol}>
+          {isSubmitting ? "..." : "+"}
+        </span>
+      </button>
+    </div>
+  ) : (
+    <button
       className={styles.openPlusButton}
       onClick={() => setClickedPlusButton(true)}
-    > + </button>;
+      title="Submit a song"
+    >
+      <span className={styles.plusSymbol}>+</span>
+    </button>
+  );
 
   // Conditionally render main content or Analyse page
   const renderContent = () => {
@@ -371,13 +455,15 @@ function AppContent() {
         <Stack spacing={1} direction="row">
           <Button className={styles.button}>Hits</Button>
           <Button className={styles.button}>New</Button>
-          <Button
-            className={`${styles.button} ${showAnalyse ? styles.active : ''}`}
-            onClick={handleAnalyseToggle}
-          >
-            <BarChartIcon fontSize="small" style={{ marginRight: '5px' }} />
-            Analyse
-          </Button>
+          {isFeatureEnabled('ANALYZE') && (
+            <Button
+              className={`${styles.button} ${showAnalyse ? styles.active : ''}`}
+              onClick={handleAnalyseToggle}
+            >
+              <BarChartIcon fontSize="small" style={{ marginRight: '5px' }} />
+              Analyse
+            </Button>
+          )}
         </Stack>
         <p className={styles.dropdown}>
           <Dropdown>
@@ -385,7 +471,9 @@ function AppContent() {
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem>Hits</MenuItem>
               <MenuItem>New</MenuItem>
-              <MenuItem onClick={handleAnalyseToggle}>Analyse</MenuItem>
+              {isFeatureEnabled('ANALYZE') && (
+                <MenuItem onClick={handleAnalyseToggle}>Analyse</MenuItem>
+              )}
             </Menu>
           </Dropdown>
         </p>
@@ -430,7 +518,6 @@ function AppContent() {
               />
             )}
           </div>
-          <Button className={`${styles.topRightButtons} ${styles.helpButton}`}>?</Button>
         </div>
       </header>
 
