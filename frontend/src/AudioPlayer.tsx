@@ -3,6 +3,7 @@ import AudioPlayer from "./components/CustomAudioPlayer";
 import styles from "./styles/AudioPlayer.module.css";
 import { Height } from "@mui/icons-material";
 import { height, margin, maxHeight, maxWidth, minWidth } from "@mui/system";
+import { incrementRadioPlayCount } from "./services/suno.services";
 
 interface PlayerProps {
     currentTrack: any;
@@ -35,7 +36,7 @@ function Player({ currentTrack }: PlayerProps) {
     // Référence vers l'élément audio
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
-    // Traitement de la piste reçue
+    // Traitement de la piste reçue - optimisé pour éviter les re-renders inutiles
     useEffect(() => {
         if (!currentTrack) {
             setAudioError("Aucune piste à lire");
@@ -56,24 +57,53 @@ function Player({ currentTrack }: PlayerProps) {
 
         // Créer l'entrée pour la playlist
         const formattedTrack = {
-            id: currentTrack.id || Date.now().toString(),
+            id: currentTrack._id || Date.now().toString(),
             name: currentTrack.name || "Sans titre",
             src: currentTrack.audio,
             img: currentTrack.songImage || ""
         };
 
-        // Mettre à jour la playlist
-        setPlayList([formattedTrack]);
-        setIsAudioReady(true);
+        // Mettre à jour la playlist seulement si c'est vraiment une nouvelle chanson
+        const isNewTrack = playList.length === 0 || playList[0].src !== formattedTrack.src;
+        if (isNewTrack) {
+            console.log('Loading new track in player:', formattedTrack.name);
+            setPlayList([formattedTrack]);
+            setIsAudioReady(true);
+        }
+
         setAudioError(null);
-    }, [currentTrack]);
+
+        // Si c'est un changement de piste (nouvelle chanson), synchroniser automatiquement avec fade
+        if (currentTrack.isTrackChange && audioElementRef.current) {
+            setTimeout(() => {
+                if (audioElementRef.current && currentTrack.elapsed !== undefined) {
+                    console.log(`Track change detected, syncing to ${currentTrack.elapsed}s`);
+
+                    // Pour un changement de piste, démarrer avec un fade in très doux
+                    const targetTime = currentTrack.elapsed;
+                    audioElementRef.current.currentTime = targetTime;
+                    audioElementRef.current.volume = 0.1; // Volume bas au démarrage
+
+                    // Fade in très progressif pour éviter les à-coups
+                    let currentVol = 0.1;
+                    const fadeInterval = setInterval(() => {
+                        if (audioElementRef.current && currentVol < 1.0) {
+                            currentVol += 0.05; // Augmentation très graduelle
+                            audioElementRef.current.volume = Math.min(currentVol, 1.0);
+                        } else {
+                            clearInterval(fadeInterval);
+                        }
+                    }, 50); // Fade in sur ~1 seconde
+                }
+            }, 800); // Délai augmenté pour permettre un chargement complet
+        }
+    }, [currentTrack?.audio, currentTrack?._id, currentTrack?.isTrackChange, playList.length]); // Dépendances optimisées
 
     // Configuration du lecteur audio et synchronisation
     useEffect(() => {
         if (!isAudioReady) return;
 
         let isMounted = true;
-        let syncInterval: ReturnType<typeof setInterval>;
 
         // Configuration après le montage du composant
         const setupAudio = () => {
@@ -82,22 +112,23 @@ function Player({ currentTrack }: PlayerProps) {
 
             audioElementRef.current = audioElement;
 
-            // Définir le temps initial
+            // Définir le temps initial selon les données SSE
             if (currentTrack?.elapsed) {
                 audioElement.currentTime = currentTrack.elapsed;
             }
 
             // Gestionnaires d'événements
-            const handlePlay = () => {
+            const handlePlay = async () => {
                 if (!isMounted) return;
                 setIsPlaying(true);
-                // Synchroniser avec le serveur au démarrage de la lecture
-                syncWithServer();
+                // À chaque fois que l'utilisateur appuie sur play, se synchroniser avec la radio
+                await syncWithRadio();
             };
 
             const handlePause = () => {
                 if (!isMounted) return;
                 setIsPlaying(false);
+                // L'utilisateur peut mettre en pause, la radio continue côté serveur
             };
 
             const handleError = () => {
@@ -105,40 +136,76 @@ function Player({ currentTrack }: PlayerProps) {
                 setAudioError("Impossible de lire l'audio");
             };
 
+            const handleEnded = async () => {
+                if (!isMounted || !currentTrack?._id) return;
+                try {
+                    await incrementRadioPlayCount(currentTrack._id);
+                    console.log("Radio play count incremented for song:", currentTrack._id);
+                } catch (error) {
+                    console.error("Error incrementing radio play count:", error);
+                }
+            };
+
             // Ajout des écouteurs d'événements
             audioElement.addEventListener("play", handlePlay);
             audioElement.addEventListener("pause", handlePause);
             audioElement.addEventListener("error", handleError);
-
-            // Synchronisation périodique simple (toutes les 15 secondes)
-            syncInterval = setInterval(() => {
-                if (audioElement.paused || !isMounted) return;
-                syncWithServer();
-            }, 15000);
+            audioElement.addEventListener("ended", handleEnded);
 
             return () => {
                 audioElement.removeEventListener("play", handlePlay);
                 audioElement.removeEventListener("pause", handlePause);
                 audioElement.removeEventListener("error", handleError);
-                clearInterval(syncInterval);
+                audioElement.removeEventListener("ended", handleEnded);
             };
         };
 
-        // Synchronisation avec le serveur
-        const syncWithServer = async () => {
+        // Synchronisation intelligente avec la radio (position actuelle)
+        const syncWithRadio = async () => {
             try {
                 const res = await fetch("http://localhost:3000/player/status");
                 const data = await res.json();
 
                 if (!audioElementRef.current || typeof data.elapsed !== 'number') return;
 
-                // Si le décalage est significatif (> 3 secondes), ajuster le temps
-                const timeDiff = Math.abs(audioElementRef.current.currentTime - data.elapsed);
-                if (timeDiff > 3) {
-                    audioElementRef.current.currentTime = data.elapsed;
+                // Synchroniser seulement si c'est la même chanson
+                if (data.id === currentTrack?._id) {
+                    const currentTime = audioElementRef.current.currentTime;
+                    const serverTime = data.elapsed;
+                    const timeDiff = Math.abs(currentTime - serverTime);
+
+                    // Synchroniser seulement si la différence est significative (> 3 secondes)
+                    // Augmenté de 2 à 3 secondes pour être plus tolérant
+                    if (timeDiff > 3) {
+                        console.log(`User clicked play - syncing with radio: ${currentTime}s -> ${serverTime}s (diff: ${timeDiff.toFixed(1)}s)`);
+
+                        // Fade out très rapide, changement de position, puis fade in progressif
+                        const originalVolume = audioElementRef.current.volume;
+
+                        // Fade out ultra-rapide (50ms)
+                        audioElementRef.current.volume = originalVolume * 0.05;
+
+                        setTimeout(() => {
+                            if (audioElementRef.current) {
+                                audioElementRef.current.currentTime = serverTime;
+                                // Fade in progressif plus doux
+                                let currentVol = 0.05;
+                                const fadeInterval = setInterval(() => {
+                                    if (audioElementRef.current && currentVol < originalVolume) {
+                                        currentVol += 0.1;
+                                        audioElementRef.current.volume = Math.min(currentVol, originalVolume);
+                                    } else {
+                                        clearInterval(fadeInterval);
+                                    }
+                                }, 20);
+                            }
+                        }, 50);
+                    } else {
+                        console.log(`User clicked play - no sync needed (diff: ${timeDiff.toFixed(1)}s)`);
+                    }
                 }
             } catch (error) {
-                console.error("Erreur de synchronisation:", error);
+                console.error("Erreur de synchronisation avec la radio:", error);
             }
         };
 
@@ -148,7 +215,6 @@ function Player({ currentTrack }: PlayerProps) {
         return () => {
             isMounted = false;
             clearTimeout(timerId);
-            clearInterval(syncInterval);
         };
     }, [isAudioReady, currentTrack]);
 

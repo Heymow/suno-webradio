@@ -12,6 +12,17 @@ const ArtworkContainer = styled.div`
   img {
     width: 60px;
     height: 60px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    border-radius: 50%;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 `;
 
@@ -20,9 +31,35 @@ export const Artwork: FC = () => {
     audioPlayerStateContext
   );
 
+  const currentTrack = playList[curIdx];
+  const sunoLink = (currentTrack as any)?.src.replace("https://cdn1.suno.ai/", "https://suno.com/song/").replace(".mp3", "");
+
+
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+
+
+    if (sunoLink) {
+      console.log("Opening link:", sunoLink);
+      window.open(sunoLink, '_blank', 'noopener,noreferrer');
+    } else {
+      console.log("No suno link available");
+    }
+  };
+
   return (
     <ArtworkContainer className="artwork-container">
-      <img src={playList[curIdx]?.img} alt={""} style={coverImgsCss?.artwork} />
+      <img
+        src={currentTrack?.img}
+        alt={""}
+        style={coverImgsCss?.artwork}
+        onClick={handleImageClick}
+        title={sunoLink ? "Cliquer pour ouvrir sur Suno" : ""}
+        draggable={false}
+      />
     </ArtworkContainer>
   );
 };
