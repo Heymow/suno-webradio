@@ -8,6 +8,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
+import InfoIcon from '@mui/icons-material/Info';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, selectIsAuthenticated, selectIsActivated, logout, validateAndRefreshUserData } from '../store/authStore';
 import ActivateAccountDialog from './dialog/activateAccount';
@@ -15,6 +16,7 @@ import styles from '../styles/Profile.module.css';
 import Axios from '../utils/Axios';
 import ProfileDetails from './ProfileDetails';
 import MyMusicSent from './MyMusicSent';
+import { isFeatureEnabled } from '../config/features';
 
 interface ProfileProps {
     open: boolean;
@@ -191,24 +193,30 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                                         </ListItemIcon>
                                         <ListItemText primary="Submitted songs" />
                                     </ListItemButton>
-                                    <ListItemButton className={styles.listItemButton} onClick={handleAnalyseClick}>
-                                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                                            <AnalyticsIcon className={styles.iconColor} />
-                                        </ListItemIcon>
-                                        <ListItemText primary="Watched songs " />
-                                    </ListItemButton>
-                                    <ListItemButton className={styles.listItemButton}>
-                                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                                            <SettingsIcon className={styles.iconColor} />
-                                        </ListItemIcon>
-                                        <ListItemText primary="Settings" />
-                                    </ListItemButton>
-                                    <ListItemButton className={styles.listItemButton}>
-                                        <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
-                                            <SettingsIcon className={styles.iconColor} />
-                                        </ListItemIcon>
-                                        <ListItemText primary="About" />
-                                    </ListItemButton>
+                                    {isFeatureEnabled('WATCHED_SONGS') && (
+                                        <ListItemButton className={styles.listItemButton} onClick={handleAnalyseClick}>
+                                            <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                                                <AnalyticsIcon className={styles.iconColor} />
+                                            </ListItemIcon>
+                                            <ListItemText primary="Watched songs" />
+                                        </ListItemButton>
+                                    )}
+                                    {isFeatureEnabled('SETTINGS') && (
+                                        <ListItemButton className={styles.listItemButton}>
+                                            <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                                                <SettingsIcon className={styles.iconColor} />
+                                            </ListItemIcon>
+                                            <ListItemText primary="Settings" />
+                                        </ListItemButton>
+                                    )}
+                                    {isFeatureEnabled('ABOUT') && (
+                                        <ListItemButton className={styles.listItemButton}>
+                                            <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                                                <InfoIcon className={styles.iconColor} />
+                                            </ListItemIcon>
+                                            <ListItemText primary="About" />
+                                        </ListItemButton>
+                                    )}
                                 </List>
                             </div>
 
