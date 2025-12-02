@@ -54,6 +54,7 @@ export const SpectrumProvider: FC<PropsWithChildren<SpectrumProviderProps>> = ({
   return (
     <Provider
       theme={theme}
+      colorScheme="dark"
       width={"100%"}
       position={
         contextPlayerPlacement === "static" || !contextPlayerPlacement

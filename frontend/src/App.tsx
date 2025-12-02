@@ -8,7 +8,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import IconButton from '@mui/material/IconButton';
 import AuthModal from "./components/dialog/AuthModal";
-import Profile from "./components/Profile";
+import Profile from "./components/profile";
 import Analyse from "./pages/Analyse";
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
@@ -35,7 +35,8 @@ const ERROR_MESSAGES = {
 };
 
 const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
-const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/player/connection`;
+// TEST: URL Absolue directe pour contourner tout proxy
+const SSE_URL = 'http://localhost:4000/player/connection';
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
@@ -250,23 +251,30 @@ function AppContent() {
       if (isConnecting || !isMounted) return;
       isConnecting = true;
 
+      console.log('Attempting SSE connection to:', SSE_URL);
+
       if (eventSource) {
         eventSource.close();
       }
 
       try {
+        console.log('Connecting to SSE URL:', SSE_URL);
+
         eventSource = new EventSource(SSE_URL, { withCredentials: true });
 
         eventSource.onopen = () => {
           if (!isMounted) return;
+          console.log('SSE Connection established successfully (onopen fired)');
           localReconnectAttempts = 0;
           isConnecting = false;
         };
 
         eventSource.onmessage = (event) => {
           if (!isMounted) return;
+          console.log('Raw SSE event received:', event.data);
           try {
             const data = JSON.parse(event.data);
+            console.log('Parsed SSE data:', data);
             handleTrackUpdate(data);
           } catch (error) {
             console.error('Erreur lors du parsing des données SSE:', error);
@@ -275,7 +283,7 @@ function AppContent() {
 
         eventSource.onerror = (error) => {
           if (!isMounted) return;
-          console.error('SSE Connection error:', error);
+          console.error('SSE Connection error. ReadyState:', eventSource?.readyState, error);
           if (eventSource) {
             eventSource.close();
           }

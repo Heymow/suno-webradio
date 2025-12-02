@@ -4,8 +4,9 @@ import { selectCurrentToken, setCredentials, logout } from '../store/authStore';
 import { refreshAccessToken } from '../services/user.services';
 
 // Création de l'instance Axios avec l'URL de base et les headers par défaut
+// En développement, on utilise le proxy (chemin relatif vide) pour éviter les problèmes CORS
 const Axios = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:3000'),
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'

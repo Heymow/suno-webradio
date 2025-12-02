@@ -402,6 +402,18 @@ a:hover {
   display: flex;
 }
 
+.cardContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  width: 100%;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
 .directButton {
   z-index: 2;
   height: 60px;
@@ -412,6 +424,7 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  color: white;
   border: 2px solid transparent;
   background: linear-gradient(to right, #000000, #000000), linear-gradient(to right, #ffffff, #ffffff);
   background-origin: border-box;
