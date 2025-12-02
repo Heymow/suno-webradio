@@ -157,11 +157,38 @@ function Player({ currentTrack }: PlayerProps) {
             audioElement.addEventListener("error", handleError);
             audioElement.addEventListener("ended", handleEnded);
 
+            // Tentative d'autoplay intelligent
+            const attemptPlay = async () => {
+                try {
+                    if (audioElement.paused) {
+                        await audioElement.play();
+                    }
+                } catch (error) {
+                    console.log("Autoplay prevented by browser, waiting for interaction");
+                }
+            };
+
+            // Essayer de jouer immédiatement
+            attemptPlay();
+
+            // Fallback : Jouer au premier clic/touche sur la page
+            const handleInteraction = () => {
+                attemptPlay();
+                // On retire les écouteurs après la première interaction
+                document.removeEventListener('click', handleInteraction);
+                document.removeEventListener('keydown', handleInteraction);
+            };
+
+            document.addEventListener('click', handleInteraction);
+            document.addEventListener('keydown', handleInteraction);
+
             return () => {
                 audioElement.removeEventListener("play", handlePlay);
                 audioElement.removeEventListener("pause", handlePause);
                 audioElement.removeEventListener("error", handleError);
                 audioElement.removeEventListener("ended", handleEnded);
+                document.removeEventListener('click', handleInteraction);
+                document.removeEventListener('keydown', handleInteraction);
             };
         };
 
@@ -231,6 +258,7 @@ function Player({ currentTrack }: PlayerProps) {
                         playList={playList}
                         audioInitialState={{
                             muted: false,
+                            isPlaying: true,
                             curPlayId: playList[0].id,
                         }}
                         placement={{
