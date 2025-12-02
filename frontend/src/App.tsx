@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
-import AudioPlayer from "./AudioPlayer";
-import LightSunoCard from "./LightSunoCard";
+import AudioPlayer from "./components/AudioPlayer";
+import LightSunoCard from "./components/LightSunoCard";
 import styles from "./styles/App.module.css";
-import SunoProjectCard from "./SunoProjectCard";
+import SunoProjectCard from "./components/SunoProjectCard";
 import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
 import AuthModal from "./components/dialog/AuthModal";
 import Profile from "./components/Profile";
 import Analyse from "./pages/Analyse";
@@ -35,7 +35,7 @@ const ERROR_MESSAGES = {
 };
 
 const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
-const SSE_URL = "http://localhost:3000/player/connection";
+const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/player/connection`;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
@@ -500,7 +500,7 @@ function AppContent() {
                 />
               </>
             ) : (
-              <Icon
+              <IconButton
                 sx={{
                   width: 40,
                   height: 40,
@@ -513,9 +513,10 @@ function AppContent() {
                     backgroundColor: 'rgba(255,255,255,0.1)'
                   }
                 }}
-                component={AccountCircleIcon}
                 onClick={() => setLoginModalOpen(true)}
-              />
+              >
+                <AccountCircleIcon />
+              </IconButton>
             )}
           </div>
         </div>

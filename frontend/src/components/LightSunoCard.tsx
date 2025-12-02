@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './styles/SunoProjectCard.module.css';
+import styles from '../styles/SunoProjectCard.module.css';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
@@ -13,9 +13,9 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Tooltip from '@mui/material/Tooltip';
-import { checkVoteStatus } from './services/suno.services';
-import { useAppSelector } from './store/hooks';
-import { selectIsAuthenticated } from './store/authStore';
+import { checkVoteStatus } from '../services/suno.services';
+import { useAppSelector } from '../store/hooks';
+import { selectIsAuthenticated } from '../store/authStore';
 
 export default function RecipeReviewCard(props: SunoSong): JSX.Element {
     const isAuthenticated = useAppSelector(selectIsAuthenticated);

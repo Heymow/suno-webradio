@@ -9,8 +9,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 30%;
-  padding-left: -30%;
+  width: 40%;
+  max-width: 600px;
+  flex-shrink: 1;
 }
 
 .header {
