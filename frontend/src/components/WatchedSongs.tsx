@@ -3,7 +3,7 @@ import { Box, Typography, CircularProgress, Alert, IconButton } from '@mui/mater
 import DeleteIcon from '@mui/icons-material/Delete';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import styles from '../styles/Analyse.module.css';
+import styles from '../styles/WatchedSongs.module.css';
 import { useAppSelector } from '../store/hooks';
 import { selectCurrentUserId } from '../store/authStore';
 import Axios from '../utils/Axios';
@@ -165,7 +165,7 @@ const Analyse: React.FC = () => {
     let sunoLinkContainer = clickedPlusButton ? (
         <div className={styles.inputSunoLinkContainer}>
             <input
-                placeholder="Paste your Suno link here..."
+                placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
                 className={styles.inputSunoLink}
                 onChange={handleInputChange}
                 value={sunoLink}

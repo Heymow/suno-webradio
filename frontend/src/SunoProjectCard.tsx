@@ -11,6 +11,12 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import MusicNoteIcon from '@mui/icons-material/MusicNote';
+import Tooltip from '@mui/material/Tooltip';
+import { voteSong, unvoteSong, checkVoteStatus } from './services/suno.services';
+import { useSnackbar } from 'notistack';
+import { useAppSelector, useAppDispatch } from './store/hooks';
+import { selectIsAuthenticated, selectIsActivated, decrementLikesRemaining, incrementLikesRemaining } from './store/authStore';
 
 // Custom hook for typing effect
 const useTypingEffect = (fullText: string | undefined, speed = 10) => {
@@ -35,6 +41,10 @@ const useTypingEffect = (fullText: string | undefined, speed = 10) => {
 };
 
 export default function SunoProjectCard(props: SunoSong): JSX.Element {
+    const { enqueueSnackbar } = useSnackbar();
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const isActivated = useAppSelector(selectIsActivated);
+    const dispatch = useAppDispatch();
 
     // Example texts with typing effect
     const titleText = useTypingEffect(props.name, 70);
@@ -48,7 +58,65 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
 
     const [imageClass, setImageClass] = React.useState(styles.imageHidden);
     const [currentImage, setCurrentImage] = React.useState(props.songImage);
+    const [isVoting, setIsVoting] = React.useState(false);
+    const [localVoteCount, setLocalVoteCount] = React.useState(props.radioVoteCount || 0);
+    const [hasVoted, setHasVoted] = React.useState(false);
 
+    const handleAvatarClick = () => {
+        if (props.audio) {
+            console.log(props)
+            const sunoLink = props.audio.replace("https://cdn1.suno.ai/", "https://suno.com/song/").replace(".mp3", "");
+            window.open(sunoLink, '_blank', 'noopener,noreferrer');
+        }
+    };
+
+    const handleVote = async () => {
+        if (!isAuthenticated) {
+            enqueueSnackbar("Please log in to vote for songs", { variant: "warning" });
+            return;
+        }
+
+        if (!isActivated) {
+            enqueueSnackbar("Please activate your account to vote for songs", { variant: "warning" });
+            return;
+        }
+
+        try {
+            setIsVoting(true);
+
+            if (hasVoted) {
+                // Retirer le vote
+                const response = await unvoteSong(props._id);
+                setLocalVoteCount(response.song.radioVoteCount);
+                setHasVoted(false);
+                dispatch(incrementLikesRemaining());
+                enqueueSnackbar(`Vote removed! ${response.likesRemainingToday} votes remaining today.`, { variant: "info" });
+            } else {
+                // Ajouter le vote
+                const response = await voteSong(props._id);
+                setLocalVoteCount(response.song.radioVoteCount);
+                setHasVoted(true);
+                dispatch(decrementLikesRemaining());
+                enqueueSnackbar(`Vote submitted successfully! ${response.likesRemainingToday} votes remaining today.`, { variant: "success" });
+            }
+
+            // Re-vérifier le statut après l'action pour s'assurer de la cohérence
+            try {
+                const { hasVoted: newVoteStatus } = await checkVoteStatus(props._id);
+                setHasVoted(newVoteStatus);
+            } catch (error) {
+                console.error("Error re-checking vote status:", error);
+            }
+        } catch (error: any) {
+            if (error?.response?.data?.message) {
+                enqueueSnackbar(error.response.data.message, { variant: "error" });
+            } else {
+                enqueueSnackbar("Failed to submit vote. Please try again.", { variant: "error" });
+            }
+        } finally {
+            setIsVoting(false);
+        }
+    };
 
     React.useEffect(() => {
         setImageClass(styles.imageHidden);
@@ -58,6 +126,35 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
         }, 1200); // Délai pour s'assurer que l'image est chargée avant de commencer la transition
         return () => clearTimeout(timer);
     }, [props.songImage]);
+
+    React.useEffect(() => {
+        setLocalVoteCount(props.radioVoteCount || 0);
+    }, [props.radioVoteCount]);
+
+
+
+    // Vérifier le statut du vote au chargement et quand la chanson change
+    React.useEffect(() => {
+        const checkUserVoteStatus = async () => {
+            if (isAuthenticated && props._id) {
+                try {
+                    const { hasVoted: userHasVoted } = await checkVoteStatus(props._id);
+                    setHasVoted(userHasVoted);
+                } catch (error) {
+                    console.error("Error checking vote status:", error);
+                }
+            } else {
+                setHasVoted(false);
+            }
+        };
+
+        checkUserVoteStatus();
+
+        // Réinitialiser le statut de vote quand la chanson change
+        return () => {
+            setHasVoted(false);
+        };
+    }, [isAuthenticated, props._id]);
 
     return (
         <Box sx={{
@@ -82,22 +179,57 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                     className={styles.cardHeader}
                     sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2 }}
                     avatar={
-                        <Avatar sx={{ bgcolor: red[500] }} aria-label="avatar" src={props.avatarImage}>
+                        <Avatar
+                            sx={{
+                                bgcolor: red[500],
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s ease',
+                                '&:hover': {
+                                    transform: 'scale(1.1)'
+                                }
+                            }}
+                            aria-label="avatar"
+                            src={props.songImage}
+                            onClick={handleAvatarClick}
+                            title="Click to open on Suno">
                         </Avatar>
 
                     }
                     title={<Typography className={styles.headerCard} variant="h6">{titleText}
-                        <Chip sx={{ height: '25px' }} label={props.playCount >= 1000
-                            ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginLeft: "-5px", marginRight: "5px", fontSize: '19px' }} /> {Math.floor(props.playCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}><PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '19px' }} /> {props.playCount}</div>}>
-                        </Chip>
+                        <Tooltip title="Suno original plays">
+                            <Chip sx={{
+                                height: '25px',
+                                cursor: 'default',
+                                backgroundColor: '#00bcd4',
+                                color: 'white'
+                            }} label={props.playCount >= 1000
+                                ? <div className={styles.fragment}> <PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginLeft: "-5px", marginRight: "5px", fontSize: '22px' }} /> {Math.floor(props.playCount / 1000) + "K"} </div> :
+                                <div className={styles.fragment}><PlayArrowIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '22px' }} /> {props.playCount}</div>}>
+                            </Chip>
+                        </Tooltip>
                     </Typography>}
 
                     subheader={<Typography className={styles.headerCard} variant="subtitle2">{subheaderText}
-                        <Chip sx={{ height: '25px', marginLeft: "0px" }} label={props.upVoteCount >= 1000 ?
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '16px' }} /> {Math.floor(props.upVoteCount / 1000) + "K"} </div> :
-                            <div className={styles.fragment}> <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '13px' }} /> {props.upVoteCount}</div>}>
-                        </Chip>
+                        <Tooltip title="Suno original upvotes">
+                            <Chip sx={{
+                                height: '25px',
+                                marginLeft: "0px",
+                                cursor: 'default',
+                                backgroundColor: '#2196f3',
+                                color: 'white'
+                            }} label={
+                                (props.upVoteCount || 0) >= 1000 ?
+                                    <div className={styles.fragment}>
+                                        <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '13px' }} />
+                                        {Math.floor((props.upVoteCount || 0) / 1000) + "K"}
+                                    </div> :
+                                    <div className={styles.fragment}>
+                                        <ThumbUpIcon fontSize='small' sx={{ marginTop: "-2px", marginRight: "5px", fontSize: '13px' }} />
+                                        {props.upVoteCount || 0}
+                                    </div>
+                            }>
+                            </Chip>
+                        </Tooltip>
                     </Typography>}
 
                 />
@@ -105,19 +237,82 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                     <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column' }}>
                         Style of Music : {prompt}
                         {negativePrompt && <Typography sx={{ paddingTop: '5px' }}>Exclude Styles : {negativePrompt}</Typography>}
-                        <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", fontSize: "12px" }} />
-                        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            <button className={styles.likeButton}>Vote</button>
+                        <Tooltip title="Suno AI model version">
+                            <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", fontSize: "12px", cursor: 'default' }} />
+                        </Tooltip>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                            <button
+                                className={`${styles.likeButton} ${hasVoted ? styles.likeButtonVoted : ''}`}
+                                onClick={handleVote}
+                                disabled={isVoting || !isAuthenticated || !isActivated}
+                                title={hasVoted ? "Click to remove your vote" : "Click to vote for this song"}
+                            >
+                                <ThumbUpIcon
+                                    fontSize="small"
+                                    sx={{ marginRight: "8px", fontSize: "13px" }}
+                                />
+                                {isVoting ? "Voting..." : hasVoted ? "Remove Vote" : "Vote"}
+                            </button>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <Tooltip title="Radio plays">
+                                    <Chip
+                                        sx={{
+                                            height: '24px',
+                                            backgroundColor: '#9c27b0',
+                                            color: 'white',
+                                            fontSize: '11px',
+                                            cursor: 'default'
+                                        }}
+                                        label={
+                                            (props.radioPlayCount || 0) >= 1000 ?
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#ffeb3b' }} />
+                                                    <span style={{ marginLeft: "4px", fontSize: '14px' }}>
+                                                        {Math.floor((props.radioPlayCount || 0) / 1000) + "K"}
+                                                    </span>
+                                                </div> :
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#ffeb3b' }} />
+                                                    <span style={{ marginLeft: "4px", fontSize: '14px' }}>
+                                                        {props.radioPlayCount || 0}
+                                                    </span>
+                                                </div>
+                                        }>
+                                    </Chip>
+                                </Tooltip>
+                                <Tooltip title="Radio votes">
+                                    <Chip
+                                        sx={{
+                                            height: '24px',
+                                            backgroundColor: hasVoted ? '#4caf50' : '#ff6b35',
+                                            color: 'white',
+                                            fontWeight: 'bold',
+                                            fontSize: '13px',
+                                            cursor: 'default'
+                                        }}
+                                        label={localVoteCount >= 1000 ?
+                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }}>
+                                                🔥
+                                                <span style={{ marginLeft: "4px" }}>
+                                                    {Math.floor(localVoteCount / 1000) + "K"}
+                                                </span>
+                                            </div> :
+                                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }}>
+                                                🔥
+                                                <span style={{ marginLeft: "4px" }}>
+                                                    {localVoteCount}
+                                                </span>
+                                            </div>
+                                        }>
+                                    </Chip>
+                                </Tooltip>
+                            </div>
                         </Box>
                     </Box>
                 </CardContent>
-
-
             </Card>
 
-
             <div style={{ zIndex: 1, marginTop: '-20px' }}>
-
                 {props.lyrics && (
                     <>
                         <div className={styles.lyricsLabel}>Lyrics</div>
@@ -130,9 +325,7 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                         </div>
                     </>
                 )}
-
             </div>
-
         </Box>
     );
 }

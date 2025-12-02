@@ -5,9 +5,11 @@ import styles from "./styles/App.module.css";
 import SunoProjectCard from "./SunoProjectCard";
 import { submitSunoLink } from "./services/suno.services";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import Icon from '@mui/material/Icon';
 import AuthModal from "./components/dialog/AuthModal";
 import Profile from "./components/Profile";
+import Analyse from "./pages/Analyse";
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
 import { useSnackbar } from 'notistack';
@@ -21,6 +23,7 @@ import { styled } from '@mui/system';
 import { Button as BaseButton, buttonClasses } from '@mui/base/Button';
 import Stack from '@mui/material/Stack';
 import { Link } from "@mui/material";
+import { isFeatureEnabled } from './config/features';
 
 
 // Constants
@@ -59,7 +62,7 @@ const convertToSunoSong = (data: any): SunoSong => {
   }
 
   const song = {
-    id: data.id,
+    _id: data.id,
     name: data.name,
     author: data.writer,
     songImage: data.img,
@@ -70,8 +73,14 @@ const convertToSunoSong = (data: any): SunoSong => {
     avatarImage: data.avatarImage || "",
     playCount: data.playCount || 0,
     upVoteCount: data.upVoteCount || 0,
+    radioVoteCount: data.radioVoteCount || 0,
+    radioPlayCount: data.radioPlayCount || 0,
+    playlistPlays: data.playlistPlays || { hits: 0, new: 0 },
     modelVersion: data.modelVersion || "",
-    lyrics: data.lyrics || ""
+    lyrics: data.lyrics || "",
+    // Ajouter les propriétés SSE importantes
+    elapsed: data.elapsed,
+    isTrackChange: data.isTrackChange || false,
   };
 
   return song;
@@ -86,6 +95,7 @@ function AppContent() {
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
+  const [showAnalyse, setShowAnalyse] = useState<boolean>(false);
   const { enqueueSnackbar: snackBar } = useSnackbar();
 
   const dispatch = useAppDispatch();
@@ -114,7 +124,7 @@ function AppContent() {
     const checkActivationStatus = async () => {
       if (userId && isAuthenticated) {
         try {
-          const response = await Axios.get(`/users/activation-status/${userId}`);
+          const response = await Axios.get(`/users/${userId}/activation-status`);
           const isActivated = response.data.isActivated;
           dispatch(setAccountActivated(isActivated));
         } catch (error) {
@@ -138,9 +148,75 @@ function AppContent() {
 
     const handleTrackUpdate = (data: any) => {
       if (!data || !isMounted) return;
+      console.log('SSE Data received:', {
+        isTrackChange: data.isTrackChange,
+        isCountersUpdate: data.isCountersUpdate,
+        elapsed: data.elapsed,
+        id: data.id,
+        currentTrackId: currentTrackRef.current?._id,
+        radioVoteCount: data.radioVoteCount,
+        radioPlayCount: data.radioPlayCount
+      });
+
       const sunoSong = convertToSunoSong(data);
-      if (currentTrack?.audio != sunoSong.audio) {
+
+      // Si c'est une mise à jour de compteurs seulement (après vote)
+      if (data.isCountersUpdate && currentTrack?._id === sunoSong._id) {
+        console.log('Counters update only - updating without affecting audio');
+        setCurrentTrack(prev => prev ? {
+          ...prev,
+          radioVoteCount: sunoSong.radioVoteCount,
+          radioPlayCount: sunoSong.radioPlayCount,
+          playCount: sunoSong.playCount,
+          upVoteCount: sunoSong.upVoteCount,
+          // Ne pas toucher à elapsed pour éviter les bugs audio
+          isTrackChange: false
+        } : null);
+        return;
+      }
+
+      // Si c'est un changement de piste ou si c'est une nouvelle chanson
+      if (data.isTrackChange || currentTrack?.audio !== sunoSong.audio) {
+        console.log('Setting new track:', data.isTrackChange ? 'Track change' : 'New audio URL');
         setCurrentTrack(sunoSong);
+      } else if (currentTrack?._id === sunoSong._id) {
+        // Mise à jour des données de la même chanson - éviter les re-renders inutiles de AudioPlayer
+        // Mettre à jour seulement si il y a des changements significatifs (pas juste elapsed)
+        const hasSignificantChanges =
+          currentTrack.radioVoteCount !== sunoSong.radioVoteCount ||
+          currentTrack.radioPlayCount !== sunoSong.radioPlayCount ||
+          currentTrack.playCount !== sunoSong.playCount ||
+          currentTrack.upVoteCount !== sunoSong.upVoteCount;
+
+        if (hasSignificantChanges) {
+          console.log('Updating same track data with significant changes (counters)');
+          setCurrentTrack(prev => prev ? {
+            ...prev,
+            radioVoteCount: sunoSong.radioVoteCount,
+            radioPlayCount: sunoSong.radioPlayCount,
+            playCount: sunoSong.playCount,
+            upVoteCount: sunoSong.upVoteCount,
+            elapsed: data.elapsed,
+            isTrackChange: false
+          } : null);
+        } else {
+          // Mise à jour silencieuse de elapsed sans re-render complet
+          // Ajouter une protection contre les mises à jour trop fréquentes
+          if (currentTrackRef.current && data.elapsed !== undefined) {
+            const lastElapsed = currentTrackRef.current.elapsed || 0;
+            const elapsedDiff = Math.abs(data.elapsed - lastElapsed);
+
+            // Mettre à jour seulement si la différence est significative (> 5 secondes)
+            // ou si c'est la première mise à jour
+            if (elapsedDiff > 5 || lastElapsed === 0) {
+              currentTrackRef.current = {
+                ...currentTrackRef.current,
+                elapsed: data.elapsed
+              };
+              console.log('Silent elapsed update:', data.elapsed, `(diff: ${elapsedDiff}s)`);
+            }
+          }
+        }
       }
 
       if (data.previousTrack) {
@@ -308,11 +384,15 @@ function AppContent() {
     setProfileOpen(false);
   };
 
+  const handleAnalyseToggle = () => {
+    setShowAnalyse(!showAnalyse);
+  };
+
   let sunoLinkContainer = clickedPlusButton ? (
     <div className={styles.inputSunoLinkContainer}>
-      <p style={{ fontWeight: 400, fontSize: "15px" }}>Submit :</p>
+      <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0, fontSize: "14px" }}>Submit:</p>
       <input
-        placeholder="Paste your Suno song link here..."
+        placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
         className={styles.inputSunoLink}
         onChange={handleInputChange}
         value={sunoLink}
@@ -321,11 +401,52 @@ function AppContent() {
         className={styles.plusButton}
         onClick={handleSubmitSong}
         disabled={isSubmitting}
-      > + </button>
-    </div>) : <button
+        title="Add song"
+      >
+        <span className={styles.plusSymbol}>
+          {isSubmitting ? "..." : "+"}
+        </span>
+      </button>
+    </div>
+  ) : (
+    <button
       className={styles.openPlusButton}
       onClick={() => setClickedPlusButton(true)}
-    > + </button>;
+      title="Submit a song"
+    >
+      <span className={styles.plusSymbol}>+</span>
+    </button>
+  );
+
+  // Conditionally render main content or Analyse page
+  const renderContent = () => {
+    if (showAnalyse) {
+      return <Analyse onBack={handleAnalyseToggle} />;
+    }
+
+    return (
+      <>
+        <div className={styles.content}>
+          {currentTrack ? (
+            <div className={styles.projectCardContainer}>
+              <button className={styles.directButton}>Live</button>
+              <SunoProjectCard {...currentTrack} />
+            </div>
+          ) : (
+            <div className={styles.cardContainer}>
+              Awaiting Radio...
+            </div>
+          )}
+        </div>
+        <div className={styles.previousAndNextSongsContainer}>
+          {previousTrack && <LightSunoCard {...previousTrack} />}
+          <button className={styles.previousSongText}>← Prev Song</button>
+          <button className={styles.nextSongText}>Next Song →</button>
+          {nextTrack && <LightSunoCard {...nextTrack} />}
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -334,6 +455,15 @@ function AppContent() {
         <Stack spacing={1} direction="row">
           <Button className={styles.button}>Hits</Button>
           <Button className={styles.button}>New</Button>
+          {isFeatureEnabled('ANALYZE') && (
+            <Button
+              className={`${styles.button} ${showAnalyse ? styles.active : ''}`}
+              onClick={handleAnalyseToggle}
+            >
+              <BarChartIcon fontSize="small" style={{ marginRight: '5px' }} />
+              Analyse
+            </Button>
+          )}
         </Stack>
         <p className={styles.dropdown}>
           <Dropdown>
@@ -341,6 +471,9 @@ function AppContent() {
             <Menu slots={{ listbox: Listbox }}>
               <MenuItem>Hits</MenuItem>
               <MenuItem>New</MenuItem>
+              {isFeatureEnabled('ANALYZE') && (
+                <MenuItem onClick={handleAnalyseToggle}>Analyse</MenuItem>
+              )}
             </Menu>
           </Dropdown>
         </p>
@@ -385,28 +518,10 @@ function AppContent() {
               />
             )}
           </div>
-          <Button className={`${styles.topRightButtons} ${styles.helpButton}`}>?</Button>
         </div>
       </header>
 
-      <div className={styles.content}>
-        {currentTrack ? (
-          <div className={styles.projectCardContainer}>
-            <button className={styles.directButton}>Live</button>
-            <SunoProjectCard {...currentTrack} />
-          </div>
-        ) : (
-          <div className={styles.cardContainer}>
-            Awaiting Radio...
-          </div>
-        )}
-      </div>
-      <div className={styles.previousAndNextSongsContainer}>
-        {previousTrack && <LightSunoCard {...previousTrack} />}
-        <button className={styles.previousSongText}>← Prev Song</button>
-        <button className={styles.nextSongText}>Next Song →</button>
-        {nextTrack && <LightSunoCard {...nextTrack} />}
-      </div>
+      {renderContent()}
 
       <footer className={styles.footer}>
         <div className={styles.footerLeftContainer}>
