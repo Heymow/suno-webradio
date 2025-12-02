@@ -30,7 +30,13 @@ const trendingRoutes = require("./routes/trending.routes");
 const app = express();
 
 // Security Middleware
-// app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+  })
+);
 
 // Rate Limiting
 /*
