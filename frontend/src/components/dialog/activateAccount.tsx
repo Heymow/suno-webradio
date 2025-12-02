@@ -22,7 +22,7 @@ const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
 
 const verifyAccount = async (sunoLink: string, userId: string) => {
     console.log(sunoLink);
-    const response = await Axios.post(`/users/activate-pulsify-account/${userId}`, { sunoLink });
+    const response = await Axios.post(`/users/claim/${userId}`, { sunoLink });
     return response.data;
 };
 

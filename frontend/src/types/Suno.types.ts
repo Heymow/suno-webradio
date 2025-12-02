@@ -17,9 +17,19 @@ interface SunoSong {
     duration: string;
     radioVoteCount?: number;
     radioPlayCount?: number;
+    playlistPlays?: {
+        hits: number;
+        new: number;
+    };
     sunoLink?: string;
     userId?: string;
     timeUntilPlay?: string;
+    votedBy?: string[];
+    hasVoted?: boolean;
+    // Propriétés pour la synchronisation radio
+    elapsed?: number;
+    isTrackChange?: boolean;
+    isCountersUpdate?: boolean;
 }
 
 interface Playlist {

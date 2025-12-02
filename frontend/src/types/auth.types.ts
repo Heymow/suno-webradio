@@ -3,11 +3,20 @@ interface AuthModalProps {
     onClose: () => void;
 }
 
-interface AuthState {
+export interface User {
+    _id: string;
+    username: string;
+    email: string;
+    avatar: string;
+    claimed: boolean;
+    likesRemainingToday: number;
+    sunoUsername: string | null;
+}
+
+export interface AuthState {
+    user: User | null;
     token: string | null;
-    username: string | null;
-    avatar: string | null;
-    _id: string | null;
     isAuthenticated: boolean;
-    isActivated: boolean;
+    isLoading: boolean;
+    error: string | null;
 } 
