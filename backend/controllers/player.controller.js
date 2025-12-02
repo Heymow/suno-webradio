@@ -65,3 +65,7 @@ exports.getNextTrackInfo = (req, res) => {
         }
     });
 };
+
+exports.updateCurrentTrackData = async () => {
+    await playerService.updateCurrentTrackData();
+};

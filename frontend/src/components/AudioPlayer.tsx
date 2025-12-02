@@ -35,6 +35,8 @@ function Player({ currentTrack }: PlayerProps) {
 
     // Référence vers l'élément audio
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
+    // Référence pour suivre la dernière piste jouée et éviter les sauts
+    const lastTrackIdRef = useRef<string | null>(null);
 
     // Traitement de la piste reçue - optimisé pour éviter les re-renders inutiles
     useEffect(() => {
@@ -112,9 +114,12 @@ function Player({ currentTrack }: PlayerProps) {
 
             audioElementRef.current = audioElement;
 
-            // Définir le temps initial selon les données SSE
-            if (currentTrack?.elapsed) {
-                audioElement.currentTime = currentTrack.elapsed;
+            // Définir le temps initial seulement si c'est une nouvelle piste
+            if (currentTrack?._id && currentTrack._id !== lastTrackIdRef.current) {
+                if (currentTrack.elapsed) {
+                    audioElement.currentTime = currentTrack.elapsed;
+                }
+                lastTrackIdRef.current = currentTrack._id;
             }
 
             // Gestionnaires d'événements

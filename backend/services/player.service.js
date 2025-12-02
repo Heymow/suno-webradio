@@ -1,4 +1,5 @@
 const { Playlist } = require("../models/playlists");
+const { SunoSong } = require("../models/sunoSongs");
 
 class PlayerService {
   constructor() {
@@ -152,6 +153,34 @@ class PlayerService {
         await this.loadPlaylist();
       }
     }, timeUntilNext);
+  }
+
+  async updateCurrentTrackData() {
+    if (!this.track) return;
+    try {
+      const updatedSong = await SunoSong.findById(this.track.id);
+      if (updatedSong) {
+        // Update counters in the current track object
+        this.track.radioVoteCount = updatedSong.radioVoteCount;
+        this.track.upVoteCount = updatedSong.upVoteCount;
+        this.track.playCount = updatedSong.playCount;
+        this.track.radioPlayCount = updatedSong.radioPlayCount;
+
+        // Broadcast update with isCountersUpdate flag
+        const now = Date.now();
+        const elapsed = Math.floor((now - this.startTime) / 1000);
+
+        const trackUpdate = {
+          ...this.getTrackState(),
+          elapsed,
+          isTrackChange: false,
+          isCountersUpdate: true
+        };
+        this.broadcast(trackUpdate);
+      }
+    } catch (error) {
+      console.error("Error updating current track data:", error);
+    }
   }
 
   getTrackState() {
