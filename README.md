@@ -27,7 +27,7 @@ Pulsify is a modern web application built with:
 - **State Management**: Redux Toolkit
 - **HTTP Client**: Axios with automatic token refresh
 - **Notifications**: Notistack for user feedback
-- **Audio Player**: Custom audio player with wavesurfer.js integration
+- **Audio Player**: Custom audio player built with React Modern Audio Player
 
 ### Backend (Expected)
 The application expects a backend API running on `http://localhost:3000` with the following endpoints:
