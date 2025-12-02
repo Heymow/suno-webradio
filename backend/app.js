@@ -72,7 +72,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware pour les headers SSE
 app.use("/player/connection", (req, res, next) => {
-  console.log('SSE Middleware hit:', req.url);
+  console.log("SSE Middleware hit:", req.url);
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");

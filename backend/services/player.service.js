@@ -195,13 +195,13 @@ class PlayerService {
   }
 
   addClient(res) {
-    console.log('PlayerService: Adding new client');
+    console.log("PlayerService: Adding new client");
     this.clients.push(res);
     // Send a comment to flush headers immediately and ensure connection is alive
-    res.write(': connected\n\n');
+    res.write(": connected\n\n");
 
     if (this.track) {
-      console.log('PlayerService: Sending initial state to client');
+      console.log("PlayerService: Sending initial state to client");
       const nextIndex = (this.currentTrackIndex + 1) % this.playlist.length;
       const nextTrack = this.playlist[nextIndex];
 
@@ -230,7 +230,7 @@ class PlayerService {
       };
       res.write(`data: ${JSON.stringify(initialState)}\n\n`);
     } else {
-      console.log('PlayerService: No track playing, skipping initial state');
+      console.log("PlayerService: No track playing, skipping initial state");
     }
   }
 
