@@ -4,7 +4,7 @@ import { useAppSelector } from '../store/hooks';
 import { selectCurrentUserId } from '../store/authStore';
 import styles from '../styles/MyMusicSent.module.css';
 import Axios from '../utils/Axios';
-import LightSunoCard from '../LightSunoCard';
+import LightSunoCard from './LightSunoCard';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import DeleteConfirmationDialog from './dialog/DeleteConfirmationDialog';

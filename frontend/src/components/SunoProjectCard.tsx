@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './styles/SunoProjectCard.module.css';
+import styles from '../styles/SunoProjectCard.module.css';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardMedia from '@mui/material/CardMedia';
@@ -13,10 +13,10 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import Tooltip from '@mui/material/Tooltip';
-import { voteSong, unvoteSong, checkVoteStatus } from './services/suno.services';
+import { voteSong, unvoteSong, checkVoteStatus } from '../services/suno.services';
 import { useSnackbar } from 'notistack';
-import { useAppSelector, useAppDispatch } from './store/hooks';
-import { selectIsAuthenticated, selectIsActivated, decrementLikesRemaining, incrementLikesRemaining } from './store/authStore';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { selectIsAuthenticated, selectIsActivated, decrementLikesRemaining, incrementLikesRemaining } from '../store/authStore';
 
 // Custom hook for typing effect
 const useTypingEffect = (fullText: string | undefined, speed = 10) => {

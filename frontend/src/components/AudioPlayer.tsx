@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import AudioPlayer from "./components/CustomAudioPlayer";
-import styles from "./styles/AudioPlayer.module.css";
+import AudioPlayer from "./CustomAudioPlayer";
+import styles from "../styles/AudioPlayer.module.css";
 import { Height } from "@mui/icons-material";
 import { height, margin, maxHeight, maxWidth, minWidth } from "@mui/system";
-import { incrementRadioPlayCount } from "./services/suno.services";
+import { incrementRadioPlayCount } from "../services/suno.services";
 
 interface PlayerProps {
     currentTrack: any;
@@ -163,7 +163,7 @@ function Player({ currentTrack }: PlayerProps) {
         // Synchronisation intelligente avec la radio (position actuelle)
         const syncWithRadio = async () => {
             try {
-                const res = await fetch("http://localhost:3000/player/status");
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/player/status`);
                 const data = await res.json();
 
                 if (!audioElementRef.current || typeof data.elapsed !== 'number') return;

@@ -5,7 +5,7 @@ import { refreshAccessToken } from '../services/user.services';
 
 // Création de l'instance Axios avec l'URL de base et les headers par défaut
 const Axios = axios.create({
-    baseURL: 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
