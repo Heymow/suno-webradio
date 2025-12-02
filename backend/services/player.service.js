@@ -174,7 +174,7 @@ class PlayerService {
           ...this.getTrackState(),
           elapsed,
           isTrackChange: false,
-          isCountersUpdate: true
+          isCountersUpdate: true,
         };
         this.broadcast(trackUpdate);
       }
