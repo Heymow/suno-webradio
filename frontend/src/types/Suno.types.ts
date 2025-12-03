@@ -38,7 +38,7 @@ export interface Playlist {
     img: string;
     src: string;
     id: number;
-} 
+}
 // Raw Suno API Response Types
 
 export interface SunoClipMetadata {
