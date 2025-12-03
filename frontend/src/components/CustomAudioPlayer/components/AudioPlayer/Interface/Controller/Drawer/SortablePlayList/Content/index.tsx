@@ -41,12 +41,12 @@ export const PlayList: FC<SortablePlayListProps> = ({ isOpen, setIsOpen }) => {
             {playList.map((data, index) => (
               <SortableList.Item
                 key={`sortable-item-${index}`}
+                {...otherSortableItemEventProps}
                 index={index}
                 listData={playList}
                 dragStartIdx={index}
                 onClick={() => onClickItem(index)}
                 onDragStart={() => onDragStartItem(index)}
-                {...otherSortableItemEventProps}
               >
                 <PlayListItem data={data} />
               </SortableList.Item>

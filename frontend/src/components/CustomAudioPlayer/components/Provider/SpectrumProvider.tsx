@@ -29,7 +29,7 @@ export const SpectrumProvider: FC<PropsWithChildren<SpectrumProviderProps>> = ({
   }>();
 
   // Extract className and UNSAFE_className to merge them and avoid passing className to Provider
-  const { className, UNSAFE_className, ...otherRootProps } = rootContainerProps || {};
+  const { className, UNSAFE_className, ...otherRootProps } = (rootContainerProps || {}) as any;
   const mergedClassName = `rm-audio-player-provider ${UNSAFE_className || ""} ${className || ""}`.trim();
 
   useLayoutEffect(() => {

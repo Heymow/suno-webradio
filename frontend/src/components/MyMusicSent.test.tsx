@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import MyMusicSent from './MyMusicSent';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -29,8 +30,22 @@ const createMockStore = (initialState = {}) => {
         },
         preloadedState: {
             auth: {
-                user: { _id: 'user1', username: 'testuser' },
+                user: {
+                    _id: 'user1',
+                    username: 'testuser',
+                    email: 'test@example.com',
+                    avatar: 'avatar.jpg',
+                    claimed: false,
+                    likesRemainingToday: 10,
+                    sunoUsername: 'sunoUser'
+                },
                 isAuthenticated: true,
+                token: null,
+                isLoading: false,
+                error: null,
+                isActivated: false,
+                suno_username: null,
+                avatar: null,
                 ...initialState
             }
         }

@@ -16,6 +16,11 @@ import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { GoogleLogin } from '@react-oauth/google';
 
+interface AuthModalProps {
+    open: boolean;
+    onClose: () => void;
+}
+
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const dispatch = useAppDispatch();
     const { enqueueSnackbar: snackBar } = useSnackbar();

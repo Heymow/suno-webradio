@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import SunoProjectCard from './SunoProjectCard';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';

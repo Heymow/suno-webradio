@@ -35,12 +35,18 @@ const renderWithStore = (component: React.ReactElement, initialState = {}) => {
                     _id: 'user123',
                     username: 'TestUser',
                     avatar: 'avatar.jpg',
+                    email: 'test@example.com',
+                    claimed: false,
+                    likesRemainingToday: 10,
+                    sunoUsername: 'sunoUser',
                     ...initialState
                 },
                 token: 'token',
                 isAuthenticated: true,
-                loading: false,
-                error: null
+                isLoading: false,
+                error: null,
+                isActivated: false,
+                suno_username: null
             }
         }
     });

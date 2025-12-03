@@ -9,6 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import DeleteConfirmationDialog from './dialog/DeleteConfirmationDialog';
 import { submitSunoLink } from '../services/suno.services';
+import { SunoSong } from '../types/Suno.types';
 
 // Constants
 const ERROR_MESSAGES = {

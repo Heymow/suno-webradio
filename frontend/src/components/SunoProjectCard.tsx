@@ -8,6 +8,7 @@ import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
 import Box from '@mui/material/Box';
+import { SunoSong } from '../types/Suno.types';
 import Chip from '@mui/material/Chip';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';

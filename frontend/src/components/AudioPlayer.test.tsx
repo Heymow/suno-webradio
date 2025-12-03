@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import AudioPlayer from './AudioPlayer';
 import { Provider } from 'react-redux';
@@ -21,7 +22,7 @@ describe('AudioPlayer', () => {
     it('renders correctly', () => {
         render(
             <Provider store={store}>
-                <AudioPlayer />
+                <AudioPlayer currentTrack={null} />
             </Provider>
         );
 

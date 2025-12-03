@@ -7,6 +7,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { checkVoteStatus } from '../services/suno.services';
 import { useAppSelector } from '../store/hooks';
 import { selectIsAuthenticated } from '../store/authStore';
+import { SunoSong } from '../types/Suno.types';
 
 interface LightSunoCardProps extends SunoSong {
     reduced?: boolean;

@@ -1,7 +1,7 @@
 // Type pour ObjectId MongoDB sans dépendance mongoose
-type ObjectId = string;
+export type ObjectId = string;
 
-interface SunoSong {
+export interface SunoSong {
     _id: ObjectId;
     name: string;
     author: string;
@@ -32,7 +32,7 @@ interface SunoSong {
     isCountersUpdate?: boolean;
 }
 
-interface Playlist {
+export interface Playlist {
     name: string;
     writer: string;
     img: string;

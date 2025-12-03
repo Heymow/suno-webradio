@@ -4,6 +4,7 @@ import LightSunoCard from "./components/LightSunoCard";
 import styles from "./styles/App.module.css";
 import SunoProjectCard from "./components/SunoProjectCard";
 import { submitSunoLink } from "./services/suno.services";
+import { SunoSong } from "./types/Suno.types";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import IconButton from '@mui/material/IconButton';
@@ -175,7 +176,7 @@ function AppContent() {
       // Si c'est une mise à jour de compteurs seulement (après vote)
       if (data.isCountersUpdate && currentTrack?._id === sunoSong._id) {
         console.log('Counters update only - updating without affecting audio');
-        setCurrentTrack(prev => prev ? {
+        setCurrentTrack((prev: SunoSong | null) => prev ? {
           ...prev,
           radioVoteCount: sunoSong.radioVoteCount,
           radioPlayCount: sunoSong.radioPlayCount,
@@ -202,7 +203,7 @@ function AppContent() {
 
         if (hasSignificantChanges) {
           console.log('Updating same track data with significant changes (counters)');
-          setCurrentTrack(prev => prev ? {
+          setCurrentTrack((prev: SunoSong | null) => prev ? {
             ...prev,
             radioVoteCount: sunoSong.radioVoteCount,
             radioPlayCount: sunoSong.radioPlayCount,
@@ -673,7 +674,7 @@ const grey = {
 };
 
 const Listbox = styled('ul')(
-  ({ theme }) => `
+  ({ theme }: { theme: any }) => `
   font-family: 'IBM Plex Sans', sans-serif;
   font-size: 0.875rem;
   box-sizing: border-box;
@@ -693,7 +694,7 @@ const Listbox = styled('ul')(
 );
 
 const MenuItem = styled(BaseMenuItem)(
-  ({ theme }) => `
+  ({ theme }: { theme: any }) => `
   list-style: none;
   padding: 8px;
   border-radius: 8px;
@@ -717,7 +718,7 @@ const MenuItem = styled(BaseMenuItem)(
 );
 
 const MenuButton = styled(BaseMenuButton)(
-  ({ theme }) => `
+  ({ theme }: { theme: any }) => `
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
   font-size: 0.875rem;
@@ -748,7 +749,7 @@ const MenuButton = styled(BaseMenuButton)(
 );
 
 const Button = styled(BaseButton)(
-  ({ theme }) => `
+  ({ theme }: { theme: any }) => `
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
   font-size: 0.875rem;

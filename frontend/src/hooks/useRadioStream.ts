@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Axios from '../utils/Axios';
 import { useSnackbar } from 'notistack';
+import { SunoSong } from '../types/Suno.types';
 
 // Constants
 const ERROR_MESSAGES = {
@@ -92,7 +93,7 @@ export const useRadioStream = () => {
 
             if (data.isCountersUpdate && currentTrack?._id === sunoSong._id) {
                 console.log('Counters update only - updating without affecting audio');
-                setCurrentTrack(prev => prev ? {
+                setCurrentTrack((prev: SunoSong | null) => prev ? {
                     ...prev,
                     radioVoteCount: sunoSong.radioVoteCount,
                     radioPlayCount: sunoSong.radioPlayCount,
@@ -115,7 +116,7 @@ export const useRadioStream = () => {
 
                 if (hasSignificantChanges) {
                     console.log('Updating same track data with significant changes (counters)');
-                    setCurrentTrack(prev => prev ? {
+                    setCurrentTrack((prev: SunoSong | null) => prev ? {
                         ...prev,
                         radioVoteCount: sunoSong.radioVoteCount,
                         radioPlayCount: sunoSong.radioPlayCount,

@@ -354,7 +354,7 @@ function Player({ currentTrack, isEmbed = false }: PlayerProps) {
             <div className={`${styles.audioPlayer} ${isEmbed ? styles.embedPlayer : ''}`}>
                 {isAudioReady && playList.length > 0 ? (
                     <AudioPlayer
-                        audioRef={audioElementRef}
+                        audioRef={audioElementRef as React.MutableRefObject<HTMLAudioElement>}
                         playList={playList}
                         audioInitialState={{
                             muted: false,
