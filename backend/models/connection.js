@@ -8,11 +8,13 @@ if (!mongoURI) {
     process.exit(1); // Stopper l'application si la connexion est impossible
 }
 
-mongoose.connect(mongoURI)
-    .then(() => console.log('✅ Connecté à MongoDB'))
-    .catch(err => {
-        console.error('❌ Erreur de connexion MongoDB:', err);
-        process.exit(1); // Stopper l'application en cas d'erreur critique
-    });
+if (process.env.NODE_ENV !== 'test') {
+    mongoose.connect(mongoURI)
+        .then(() => console.log('✅ Connecté à MongoDB'))
+        .catch(err => {
+            console.error('❌ Erreur de connexion MongoDB:', err);
+            process.exit(1); // Stopper l'application en cas d'erreur critique
+        });
+}
 
 module.exports = mongoose; // Exporter mongoose pour l'utiliser ailleurs

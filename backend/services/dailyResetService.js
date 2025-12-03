@@ -1,4 +1,4 @@
-import { User } from '../models/users.js';
+const User = require('../models/users');
 
 // Fonction pour réinitialiser les likes de tous les utilisateurs
 const resetDailyLikes = async () => {
@@ -33,4 +33,4 @@ const scheduleDailyReset = () => {
     setTimeout(resetAndSchedule, getTimeUntilMidnight());
 };
 
-export { resetDailyLikes, scheduleDailyReset }; 
+module.exports = { resetDailyLikes, scheduleDailyReset }; 

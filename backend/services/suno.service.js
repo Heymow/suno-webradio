@@ -57,7 +57,7 @@ class SunoService {
       name: data.title || "Untitled Song",
       songImage: data.image_large_url,
       avatarImage: data.avatar_image_url,
-      modelVersion: data.major_model_version,
+      modelVersion: data.major_model_version || data.model_name || "Unknown",
       author: data.display_name,
       playCount: data.play_count,
       upVoteCount: data.upvote_count,

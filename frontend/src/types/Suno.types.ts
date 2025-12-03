@@ -39,3 +39,48 @@ interface Playlist {
     src: string;
     id: number;
 } 
+// Raw Suno API Response Types
+
+export interface SunoClipMetadata {
+    tags?: string;
+    prompt?: string;
+    type?: string;
+    duration?: number;
+    can_remix?: boolean;
+    is_remix?: boolean;
+    concat_history?: Array<{
+        id: string;
+        type?: string;
+        infill?: boolean;
+        source?: string;
+        [key: string]: any;
+    }>;
+    history?: Array<{
+        id: string;
+        [key: string]: any;
+    }>;
+    upsample_clip_id?: string;
+    task?: string;
+    [key: string]: any;
+}
+
+export interface SunoClip {
+    id: string;
+    entity_type?: string;
+    video_url?: string;
+    audio_url: string;
+    image_url: string;
+    image_large_url: string;
+    major_model_version: string;
+    model_name?: string;
+    metadata: SunoClipMetadata;
+    user_id?: string;
+    display_name?: string;
+    handle?: string;
+    avatar_image_url?: string;
+    title?: string;
+    play_count?: number;
+    upvote_count?: number;
+    is_public?: boolean;
+    [key: string]: any;
+}

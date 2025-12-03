@@ -1,3 +1,11 @@
+/**
+ * Suno API Controller
+ * 
+ * Handles interactions with the Suno API.
+ * 
+ * For details on the different API response structures (v4, v5, concat, upsample, cover),
+ * please refer to: backend/docs/SunoApiStructures.md
+ */
 const sunoService = require("../services/suno.service");
 const { SunoSong } = require("../models/sunoSongs");
 const { Playlist } = require("../models/playlists");
@@ -25,16 +33,22 @@ exports.getSunoClipExtended = async (req, res) => {
     const projectData = await sunoService.getClip(id);
 
     if (projectData.metadata) {
+      const history =
+        projectData.metadata.history || projectData.metadata.concat_history;
+      const lastHistoryItem =
+        history && history.length > 0 ? history[history.length - 1] : null;
+
+      const originId = lastHistoryItem
+        ? lastHistoryItem.id
+        : projectData.metadata.upsample_clip_id || projectData.id;
+
       const project = {
         id: projectData.id,
-        originId:
-          projectData.metadata.history[projectData.metadata.history.length - 1]
-            .id,
-        continue_at:
-          projectData.metadata.history[projectData.metadata.history.length - 1]
-            .continue_at,
+        originId: originId,
+        continue_at: lastHistoryItem ? lastHistoryItem.continue_at : undefined,
         image: projectData.image_large_url,
-        duration: projectData.metadata.duration, // formatDuration removed as it was undefined in original
+        duration: projectData.metadata.duration,
+        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
       };
       res.json({ result: true, project });
     } else {
@@ -51,11 +65,21 @@ exports.getSunoClipCover = async (req, res) => {
     const projectData = await sunoService.getClip(id);
 
     if (projectData.metadata) {
+      const history =
+        projectData.metadata.history || projectData.metadata.concat_history;
+      // Fallback logic: cover_clip_id -> first history item id -> upsample_clip_id -> project id
+      const originId =
+        projectData.metadata.cover_clip_id ||
+        (history && history.length > 0
+          ? history[0].id
+          : projectData.metadata.upsample_clip_id || projectData.id);
+
       const project = {
         id: projectData.id,
-        originId: projectData.metadata.cover_clip_id,
+        originId: originId,
         image: projectData.image_large_url,
         duration: projectData.metadata.duration,
+        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
       };
       res.json({ result: true, project });
     } else {
@@ -72,11 +96,21 @@ exports.getSunoClipInfo = async (req, res) => {
     const projectData = await sunoService.getClip(id);
 
     if (projectData.metadata) {
+      const history =
+        projectData.metadata.history || projectData.metadata.concat_history;
+      const firstHistoryItem =
+        history && history.length > 0 ? history[0] : null;
+
+      const originId = firstHistoryItem
+        ? firstHistoryItem.id
+        : projectData.metadata.upsample_clip_id || projectData.id;
+
       const project = {
         id: projectData.id,
-        originId: projectData.metadata.history[0].id,
+        originId: originId,
         image: projectData.image_large_url,
         duration: projectData.metadata.duration,
+        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
       };
       res.json({ result: true, project });
     } else {
