@@ -11,7 +11,7 @@ import AuthModal from "./components/dialog/AuthModal";
 import Profile from "./components/profile";
 import Analyse from "./pages/Analyse";
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername } from './store/authStore';
+import { selectCurrentUser, selectCurrentAvatar, selectCurrentUserId, setAccountActivated, validateAndRefreshUserData, selectIsAuthenticated, selectCurrentSunoUsername, updateUserProfile } from './store/authStore';
 import { useSnackbar } from 'notistack';
 import Avatar from '@mui/material/Avatar';
 import Axios from './utils/Axios';
@@ -24,19 +24,22 @@ import { Button as BaseButton, buttonClasses } from '@mui/base/Button';
 import Stack from '@mui/material/Stack';
 import { Link } from "@mui/material";
 import { isFeatureEnabled } from './config/features';
+import ShareIcon from '@mui/icons-material/Share';
+import ShareModal from "./components/dialog/ShareModal";
+import EmbedPage from "./pages/EmbedPage";
 
 
 // Constants
 const ERROR_MESSAGES = {
-  INVALID_LINK: 'Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...',
-  LOGIN_REQUIRED: 'Veuillez vous connecter pour soumettre une musique',
-  EMPTY_LINK: 'Veuillez entrer un lien Suno',
-  SESSION_EXPIRED: 'Session expirée, reconnexion...'
+  INVALID_LINK: 'Invalid Suno link format. Example: https://suno.ai/song/123... or https://suno.com/song/123...',
+  LOGIN_REQUIRED: 'Please log in to submit a song',
+  EMPTY_LINK: 'Please enter a Suno link',
+  SESSION_EXPIRED: 'Session expired, reconnecting...'
 };
 
 const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
 // TEST: URL Absolue directe pour contourner tout proxy
-const SSE_URL = 'http://localhost:4000/player/connection';
+const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/player/connection`;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
@@ -88,14 +91,22 @@ const convertToSunoSong = (data: any): SunoSong => {
 };
 
 function AppContent() {
+  const [isEmbed] = useState(window.location.pathname === '/embed');
+
+  if (isEmbed) {
+    return <EmbedPage />;
+  }
+
   const [currentTrack, setCurrentTrack] = useState<SunoSong | null>(null);
   const [previousTrack, setPreviousTrack] = useState<SunoSong | null>(null);
-  const [nextTrack, setNextTrack] = useState<SunoSong | null>(null);
+  const [nextTracks, setNextTracks] = useState<SunoSong[]>([]);
   const [sunoLink, setSunoLink] = useState<string>("");
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
+  const [shareModalOpen, setShareModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [clickedPlusButton, setClickedPlusButton] = useState<boolean>(false);
+  const [isClosing, setIsClosing] = useState<boolean>(false);
   const [showAnalyse, setShowAnalyse] = useState<boolean>(false);
   const { enqueueSnackbar: snackBar } = useSnackbar();
 
@@ -129,7 +140,7 @@ function AppContent() {
           const isActivated = response.data.isActivated;
           dispatch(setAccountActivated(isActivated));
         } catch (error) {
-          console.error("Erreur lors de la vérification du statut d'activation:", error);
+          console.error("Error checking activation status:", error);
         }
       }
     };
@@ -226,8 +237,10 @@ function AppContent() {
         setPreviousTrack(currentTrackRef.current);
       }
 
-      if (data.nextTrack) {
-        setNextTrack(convertToSunoSong(data.nextTrack));
+      if (data.nextTracks) {
+        setNextTracks(data.nextTracks.map(convertToSunoSong));
+      } else if (data.nextTrack) {
+        setNextTracks([convertToSunoSong(data.nextTrack)]);
       } else if (data.isTrackChange) {
         fetchNextTrack();
       }
@@ -235,12 +248,14 @@ function AppContent() {
 
     const fetchNextTrack = async () => {
       try {
-        const { data } = await Axios.get("/player/next-track-info");
-        if (data.track && isMounted) {
-          setNextTrack(convertToSunoSong(data.track));
+        const { data } = await Axios.get("/player/next-track-info?count=2");
+        if (data.tracks && isMounted) {
+          setNextTracks(data.tracks.map(convertToSunoSong));
+        } else if (data.track && isMounted) {
+          setNextTracks([convertToSunoSong(data.track)]);
         }
       } catch (error: any) {
-        console.error("Erreur lors de la récupération de la prochaine piste:", error);
+        console.error("Error fetching next track:", error);
         if (error.response?.status === 401) {
           snackBarRef.current(ERROR_MESSAGES.SESSION_EXPIRED, { variant: 'warning' });
         }
@@ -277,7 +292,7 @@ function AppContent() {
             console.log('Parsed SSE data:', data);
             handleTrackUpdate(data);
           } catch (error) {
-            console.error('Erreur lors du parsing des données SSE:', error);
+            console.error('Error parsing SSE data:', error);
           }
         };
 
@@ -300,7 +315,7 @@ function AppContent() {
               connectSSE();
             }, RECONNECT_DELAY * Math.pow(2, localReconnectAttempts));
           } else {
-            snackBarRef.current('Impossible de se connecter au serveur', { variant: 'error' });
+            snackBarRef.current('Unable to connect to server', { variant: 'error' });
           }
         };
       } catch (error) {
@@ -360,12 +375,22 @@ function AppContent() {
 
     setIsSubmitting(true);
     try {
-      await submitSunoLink(sunoLink);
+      const response = await submitSunoLink(sunoLink);
+
+      // Update user profile if data is returned
+      if (response.user) {
+        dispatch(updateUserProfile({
+          sunoUsername: response.user.sunoUsername,
+          avatar: response.user.avatar,
+          isActivated: response.user.isActivated
+        }));
+      }
+
       setSunoLink("");
-      snackBarRef.current('Musique ajoutée avec succès !', { variant: 'success' });
+      snackBarRef.current('Song added successfully!', { variant: 'success' });
     } catch (error: any) {
       snackBarRef.current(
-        error.response?.data?.message || 'Erreur lors de l\'ajout de la musique',
+        error.response?.data?.message || 'Error adding song',
         { variant: 'error' }
       );
     } finally {
@@ -379,7 +404,7 @@ function AppContent() {
     if (isAuthenticated && !userId) {
       // Si l'ID a disparu, forcer une validation
       dispatch(validateAndRefreshUserData());
-      snackBarRef.current('Une erreur avec votre session a été détectée. Veuillez vous reconnecter.', {
+      snackBarRef.current('A session error was detected. Please log in again.', {
         variant: 'warning'
       });
       setLoginModalOpen(true);
@@ -396,14 +421,41 @@ function AppContent() {
     setShowAnalyse(!showAnalyse);
   };
 
-  let sunoLinkContainer = clickedPlusButton ? (
-    <div className={styles.inputSunoLinkContainer}>
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const handleCloseForm = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setClickedPlusButton(false);
+      setIsClosing(false);
+    }, 400);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        handleCloseForm();
+      }
+    };
+
+    if (clickedPlusButton && !isClosing) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [clickedPlusButton, isClosing]);
+
+  let sunoLinkContainer = (clickedPlusButton || isClosing) ? (
+    <div className={`${styles.inputSunoLinkContainer} ${isClosing ? styles.inputSunoLinkContainerClosing : ''}`} ref={formRef}>
       <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: 0, fontSize: "14px" }}>Submit:</p>
       <input
         placeholder="Paste your Suno song link here for adding to the playlist 'New'..."
         className={styles.inputSunoLink}
         onChange={handleInputChange}
         value={sunoLink}
+        autoFocus
       />
       <button
         className={styles.plusButton}
@@ -419,7 +471,10 @@ function AppContent() {
   ) : (
     <button
       className={styles.openPlusButton}
-      onClick={() => setClickedPlusButton(true)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setClickedPlusButton(true);
+      }}
       title="Submit a song"
     >
       <span className={styles.plusSymbol}>+</span>
@@ -447,10 +502,14 @@ function AppContent() {
           )}
         </div>
         <div className={styles.previousAndNextSongsContainer}>
-          {previousTrack && <LightSunoCard {...previousTrack} />}
-          <button className={styles.previousSongText}>← Prev Song</button>
-          <button className={styles.nextSongText}>Next Song →</button>
-          {nextTrack && <LightSunoCard {...nextTrack} />}
+          <div className={styles.comingNextLabel}>
+            <span className={styles.comingNextText}>Coming Next</span>
+            <div className={styles.comingNextLine}></div>
+          </div>
+          <div className={styles.nextTracksList}>
+            {nextTracks.length > 0 && <LightSunoCard {...nextTracks[0]} reduced />}
+            {nextTracks.length > 1 && <LightSunoCard {...nextTracks[1]} reduced />}
+          </div>
         </div>
       </>
     );
@@ -459,7 +518,9 @@ function AppContent() {
   return (
     <div className={styles.wrapper}>
       <header className={styles.header}>
-        <div className={styles.title}>PULSIFY</div>
+        <div className={styles.title}>
+          <img src="/pulsify_logo.png" alt="Pulsify" className={styles.logo} />
+        </div>
         <Stack spacing={1} direction="row">
           <Button className={styles.button}>Hits</Button>
           <Button className={styles.button}>New</Button>
@@ -476,7 +537,7 @@ function AppContent() {
         <p className={styles.dropdown}>
           <Dropdown>
             <MenuButton>Radio</MenuButton>
-            <Menu slots={{ listbox: Listbox }}>
+            <Menu slots={{ listbox: Listbox }} slotProps={{ root: { style: { zIndex: 10000 } } }}>
               <MenuItem>Hits</MenuItem>
               <MenuItem>New</MenuItem>
               {isFeatureEnabled('ANALYZE') && (
@@ -516,6 +577,7 @@ function AppContent() {
                   backgroundColor: 'transparent',
                   borderRadius: '50%',
                   padding: '5px',
+                  color: 'white',
 
                   '&:hover': {
                     backgroundColor: 'rgba(255,255,255,0.1)'
@@ -543,7 +605,12 @@ function AppContent() {
         </div>
         <div className={styles.sunoLinkContainer}>{sunoLinkContainer}
           <div className={styles.explanatorytext}>{!clickedPlusButton ? "Submit your song" : "Insert your song link"}</div></div>
-        <div className={styles.footerRightContainer} />
+        <div className={styles.footerRightContainer}>
+          <div className={styles.shareContainer} onClick={() => setShareModalOpen(true)}>
+            <ShareIcon sx={{ color: 'white' }} />
+            <span className={styles.shareText}>Share</span>
+          </div>
+        </div>
       </footer>
 
       <AuthModal
@@ -554,6 +621,11 @@ function AppContent() {
       <Profile
         open={profileOpen}
         onClose={handleProfileClose}
+      />
+      <ShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        onOpenLogin={() => setLoginModalOpen(true)}
       />
     </div>
   );
@@ -616,6 +688,7 @@ const Listbox = styled('ul')(
   color: ${theme.palette.mode === 'dark' ? grey[300] : grey[900]};
   box-shadow: 0 4px 6px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0, 0.50)' : 'rgba(0,0,0, 0.05)'
     };
+  z-index: 1000;
   `,
 );
 

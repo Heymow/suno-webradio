@@ -45,7 +45,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             dispatch(validateAndRefreshUserData());
 
             if (isAuthenticated && !userId) {
-                setError("Problème avec votre session. Veuillez vous reconnecter.");
+                setError("Session issue. Please log in again.");
                 onClose();
                 return;
             }
@@ -56,7 +56,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
 
     const fetchPulsifyId = async () => {
         if (!userId) {
-            setError("Impossible de récupérer votre ID utilisateur. Veuillez vous reconnecter.");
+            setError("Unable to retrieve user ID. Please log in again.");
             return;
         }
 
@@ -66,7 +66,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
         } catch (error) {
             console.error("Error fetching pulsifyId:", error);
             setPulsifyId("");
-            setError("Impossible de récupérer votre Pulsify ID.");
+            setError("Unable to retrieve your Pulsify ID.");
         }
     };
 
@@ -135,7 +135,7 @@ const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                                 variant="contained"
                                 color="primary"
                             >
-                                Fermer
+                                Close
                             </Button>
                         </Box>
                     ) : (

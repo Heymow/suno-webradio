@@ -45,7 +45,7 @@ const Analyse: React.FC = () => {
 
     const fetchAnalyses = async () => {
         if (!userId) {
-            setError('Utilisateur non connecté');
+            setError('User not logged in');
             setLoading(false);
             return;
         }
@@ -55,7 +55,7 @@ const Analyse: React.FC = () => {
             const response = await Axios.get(`/users/${userId}/analyses`);
             setAnalyses(response.data);
         } catch (err) {
-            setError('Erreur lors de la récupération des analyses');
+            setError('Error fetching analyses');
             console.error('Error fetching analyses:', err);
         } finally {
             setLoading(false);
@@ -71,18 +71,18 @@ const Analyse: React.FC = () => {
         setSunoLink(newLink);
 
         if (newLink && !validateSunoLink(newLink)) {
-            enqueueSnackbar('Format de lien Suno invalide', { variant: 'error' });
+            enqueueSnackbar('Invalid Suno link format', { variant: 'error' });
         }
     };
 
     const handleAddAnalyse = async () => {
         if (!sunoLink) {
-            enqueueSnackbar('Veuillez entrer un lien Suno', { variant: 'warning' });
+            enqueueSnackbar('Please enter a Suno link', { variant: 'warning' });
             return;
         }
 
         if (!validateSunoLink(sunoLink)) {
-            enqueueSnackbar('Format de lien Suno invalide', { variant: 'error' });
+            enqueueSnackbar('Invalid Suno link format', { variant: 'error' });
             return;
         }
 
@@ -95,7 +95,7 @@ const Analyse: React.FC = () => {
             const sunoResponse = await Axios.get(`/suno/clip/${sunoId}`);
 
             if (!sunoResponse.data.result) {
-                throw new Error('Impossible de récupérer les informations du morceau');
+                throw new Error('Unable to retrieve song information');
             }
 
             const sunoData = sunoResponse.data.project;
@@ -119,10 +119,10 @@ const Analyse: React.FC = () => {
             setAnalyses(prev => [...prev, response.data]);
             setSunoLink("");
             setClickedPlusButton(false);
-            enqueueSnackbar('Analyse ajoutée avec succès !', { variant: 'success' });
+            enqueueSnackbar('Analysis added successfully!', { variant: 'success' });
         } catch (err) {
             console.error('Error adding analyse:', err);
-            enqueueSnackbar('Erreur lors de l\'ajout de l\'analyse', { variant: 'error' });
+            enqueueSnackbar('Error adding analysis', { variant: 'error' });
         } finally {
             setIsSubmitting(false);
         }
@@ -132,10 +132,10 @@ const Analyse: React.FC = () => {
         try {
             await Axios.delete(`/users/${userId}/analyses/${analyseId}`);
             setAnalyses(analyses.filter(analyse => analyse.id !== analyseId));
-            enqueueSnackbar('Analyse supprimée avec succès', { variant: 'success' });
+            enqueueSnackbar('Analysis deleted successfully', { variant: 'success' });
         } catch (error) {
             console.error("Error deleting analyse:", error);
-            enqueueSnackbar('Erreur lors de la suppression de l\'analyse', { variant: 'error' });
+            enqueueSnackbar('Error deleting analysis', { variant: 'error' });
         }
     };
 

@@ -52,7 +52,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                     }}
                 >
                     <Typography variant="h6" style={{ color: 'white', fontWeight: 500 }}>
-                        Confirmer la suppression
+                        Confirm Deletion
                     </Typography>
                 </div>
                 <div
@@ -81,7 +81,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                             fontWeight: 500,
                         }}
                     >
-                        Annuler
+                        Cancel
                     </Button>
                     <Button
                         onClick={onConfirm}
@@ -91,7 +91,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                             fontWeight: 500,
                         }}
                     >
-                        Supprimer
+                        Delete
                     </Button>
                 </div>
             </div>

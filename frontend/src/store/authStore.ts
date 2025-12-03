@@ -11,7 +11,7 @@ const safelyStoreItem = (key: string, value: string | null) => {
             localStorage.setItem(key, value);
         }
     } catch (error) {
-        console.error(`Erreur lors de l'accès au localStorage pour la clé ${key}:`, error);
+        console.error(`Error accessing localStorage for key ${key}:`, error);
     }
 };
 
@@ -21,7 +21,7 @@ const safelyGetItem = (key: string): string | null => {
         const item = localStorage.getItem(key);
         return item;
     } catch (error) {
-        console.error(`Erreur lors de l'accès au localStorage pour la clé ${key}:`, error);
+        console.error(`Error accessing localStorage for key ${key}:`, error);
         return null;
     }
 };
@@ -82,6 +82,23 @@ const authSlice = createSlice({
             safelyStoreItem('userId', _id);
             safelyStoreItem('isActivated', isActivated ? 'true' : 'false');
         },
+        updateUserProfile: (state, action: PayloadAction<{ sunoUsername?: string; avatar?: string; isActivated?: boolean }>) => {
+            if (state.user) {
+                const { sunoUsername, avatar, isActivated } = action.payload;
+                if (sunoUsername !== undefined) {
+                    state.user.sunoUsername = sunoUsername;
+                    safelyStoreItem('sunoUsername', sunoUsername);
+                }
+                if (avatar !== undefined) {
+                    state.user.avatar = avatar;
+                    safelyStoreItem('userAvatar', avatar);
+                }
+                if (isActivated !== undefined) {
+                    state.user.claimed = isActivated;
+                    safelyStoreItem('isActivated', isActivated ? 'true' : 'false');
+                }
+            }
+        },
         setAccountActivated: (state, action: PayloadAction<boolean>) => {
             if (state.user) {
                 state.user.claimed = action.payload;
@@ -135,7 +152,7 @@ export const store = configureStore({
 
 export type AppDispatch = typeof store.dispatch;
 
-export const { setCredentials, setAccountActivated, decrementLikesRemaining, incrementLikesRemaining, logout, validateAndRefreshUserData } = authSlice.actions;
+export const { setCredentials, updateUserProfile, setAccountActivated, decrementLikesRemaining, incrementLikesRemaining, logout, validateAndRefreshUserData } = authSlice.actions;
 
 // Sélecteurs
 export const selectCurrentUser = (state: RootState) => state.auth.user?.username;

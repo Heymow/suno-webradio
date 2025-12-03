@@ -5,7 +5,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { loginUser, createUser } from '../../services/user.services';
+import { loginUser, createUser, googleLogin } from '../../services/user.services';
 import { useAppDispatch } from '../../store/hooks';
 import { useSnackbar } from 'notistack';
 import { setCredentials } from '../../store/authStore';
@@ -14,6 +14,7 @@ import styles from '../../styles/authModal.module.css';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { GoogleLogin } from '@react-oauth/google';
 
 const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const dispatch = useAppDispatch();
@@ -41,7 +42,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
         }, 300);
     };
 
-    // États pour les champs d'inscription
+    // States for sign up fields
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [loginError, setLoginError] = useState('');
@@ -50,11 +51,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
     const [signUpPassword, setSignUpPassword] = useState('');
     const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
 
-    // Nouveaux états pour l'avatar
+    // New states for avatar
     const [avatar, setAvatar] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-    // Nouveaux états d'erreur pour la partie Sign Up
+    // New error states for Sign Up
     const [errorSignUpUsername, setErrorSignUpUsername] = useState(false);
     const [errorSignUpEmail, setErrorSignUpEmail] = useState(false);
     const [errorSignUpPassword, setErrorSignUpPassword] = useState(false);
@@ -67,7 +68,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 setAvatar(e.target.files[0]);
                 setAvatarPreview(avatarData);
             } catch (error) {
-                snackBar('Erreur lors du traitement de l\'image', { variant: 'error' });
+                snackBar('Error processing image', { variant: 'error' });
             }
         }
     };
@@ -84,15 +85,39 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     _id: response.user._id,
                     isActivated: response.user.isActivated || false
                 }));
-                snackBar('Connexion réussie', { variant: 'success' });
+                snackBar('Login successful', { variant: 'success' });
                 onClose();
             } else {
-                setLoginError('Email ou mot de passe incorrect');
-                snackBar('Email ou mot de passe incorrect', { variant: 'error' });
+                setLoginError('Incorrect email or password');
+                snackBar('Incorrect email or password', { variant: 'error' });
             }
         } catch (error) {
-            setLoginError('Email ou mot de passe incorrect');
-            snackBar('Erreur lors de la connexion', { variant: 'error' });
+            setLoginError('Incorrect email or password');
+            snackBar('Error logging in', { variant: 'error' });
+        }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        try {
+            if (credentialResponse.credential) {
+                const response = await googleLogin(credentialResponse.credential);
+                if (response && response.token && response.user) {
+                    dispatch(setCredentials({
+                        token: response.token,
+                        username: response.user.username,
+                        avatar: response.user.avatar,
+                        sunoUsername: response.user.sunoUsername,
+                        _id: response.user._id,
+                        isActivated: response.user.isActivated || false
+                    }));
+                    snackBar('Login successful', { variant: 'success' });
+                    onClose();
+                } else {
+                    snackBar('Error logging in with Google', { variant: 'error' });
+                }
+            }
+        } catch (error) {
+            snackBar('Error logging in with Google', { variant: 'error' });
         }
     };
 
@@ -157,18 +182,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     avatar: newUser.user.avatar,
                     _id: newUser.user._id
                 }));
-                snackBar('Inscription réussie', { variant: 'success' });
+                snackBar('Registration successful', { variant: 'success' });
                 onClose();
             } else {
-                snackBar('Erreur lors de l\'inscription', { variant: 'error' });
+                snackBar('Error registering', { variant: 'error' });
             }
         } catch (error) {
             console.error('Error during sign up:', error);
-            snackBar('Erreur lors de l\'inscription', { variant: 'error' });
+            snackBar('Error registering', { variant: 'error' });
         }
     };
 
-    // Style pour retirer le gris de l'autofill
+    // Style to remove autofill gray background
     const autofillStyles = {
         '& input:-webkit-autofill': {
             WebkitBoxShadow: '0 0 0 100px white inset',
@@ -210,13 +235,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                 >
                     <Tab
                         className={`${styles.tab} ${tabIndex === 0 ? styles.active : ''} ${styles.loginTab}`}
-                        label={<span style={{ color: tabIndex === 0 ? '#fff' : '#6e64ff' }}>Se connecter</span>}
+                        label={<span style={{ color: tabIndex === 0 ? '#fff' : '#6e64ff' }}>Log In</span>}
                         icon={<LoginIcon sx={{ fontSize: '24px', color: tabIndex === 0 ? '#fff' : '#6e64ff' }} />}
                         iconPosition="start"
                     />
                     <Tab
                         className={`${styles.tab} ${tabIndex === 1 ? styles.active : ''} ${styles.signUpTab}`}
-                        label={<span style={{ color: tabIndex === 1 ? '#fff' : '#8B80FF' }}>S'inscrire</span>}
+                        label={<span style={{ color: tabIndex === 1 ? '#fff' : '#8B80FF' }}>Sign Up</span>}
                         icon={<PersonAddIcon sx={{ fontSize: '24px', color: tabIndex === 1 ? '#fff' : '#8B80FF' }} />}
                         iconPosition="start"
                     />
@@ -242,7 +267,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             error={!!loginError}
                         />
                         <TextField
-                            label="Mot de passe"
+                            label="Password"
                             type="password"
                             value={loginPassword}
                             onChange={(e) => {
@@ -255,6 +280,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             error={!!loginError}
                             helperText={loginError}
                         />
+                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    snackBar('Login Failed', { variant: 'error' });
+                                }}
+                                theme="filled_black"
+                                shape="pill"
+                            />
+                        </div>
                     </Box>
                 )}
                 {tabIndex === 1 && (
@@ -264,7 +299,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                         sx={{ opacity: formVisible ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }}
                     >
                         <TextField
-                            label="Nom d'utilisateur"
+                            label="Username"
                             value={signUpUsername}
                             onChange={(e) => setSignUpUsername(e.target.value)}
                             variant="outlined"
@@ -286,10 +321,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             className={styles.input}
                             required
                             error={errorSignUpEmail}
-                            helperText={errorSignUpEmail ? "Adresse email invalide" : ""}
+                            helperText={errorSignUpEmail ? "Invalid email address" : ""}
                         />
                         <TextField
-                            label="Mot de passe"
+                            label="Password"
                             type="password"
                             value={signUpPassword}
                             onChange={(e) => setSignUpPassword(e.target.value)}
@@ -300,7 +335,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             error={errorSignUpPassword}
                         />
                         <TextField
-                            label="Confirmer le mot de passe"
+                            label="Confirm Password"
                             type="password"
                             value={signUpConfirmPassword}
                             onChange={(e) => setSignUpConfirmPassword(e.target.value)}
@@ -309,7 +344,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                             className={styles.input}
                             required
                             error={errorSignUpConfirmPassword}
-                            helperText={errorSignUpConfirmPassword ? "Les mots de passe ne correspondent pas" : ""}
+                            helperText={errorSignUpConfirmPassword ? "Passwords do not match" : ""}
                         />
                         <div className={styles.avatarUpload}>
                             <Button
@@ -319,7 +354,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                                 startIcon={<CloudUploadIcon sx={{ fontSize: '24px' }} />}
                                 size="large"
                             >
-                                Choisir un avatar
+                                Choose Avatar
                                 <input type="file" accept="image/" hidden onChange={handleAvatarChange} />
                             </Button>
                             {avatarPreview ? (
@@ -339,7 +374,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                     className={`${styles.button} ${styles.secondary}`}
                     size="large"
                 >
-                    Annuler
+                    Cancel
                 </Button>
                 {tabIndex === 0 ? (
                     <Button
@@ -349,7 +384,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                         startIcon={<LoginIcon sx={{ fontSize: '24px' }} />}
                         size="large"
                     >
-                        Se connecter
+                        Log In
                     </Button>
                 ) : (
                     <Button
@@ -359,7 +394,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, onClose }) => {
                         startIcon={<PersonAddIcon sx={{ fontSize: '24px' }} />}
                         size="large"
                     >
-                        S'inscrire
+                        Sign Up
                     </Button>
                 )}
             </div>

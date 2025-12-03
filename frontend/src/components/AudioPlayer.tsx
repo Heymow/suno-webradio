@@ -7,6 +7,7 @@ import { incrementRadioPlayCount } from "../services/suno.services";
 
 interface PlayerProps {
     currentTrack: any;
+    isEmbed?: boolean;
 }
 
 // Hook personnalisé pour suivre la largeur de la fenêtre
@@ -24,11 +25,12 @@ function useWindowWidth() {
     return width;
 }
 
-function Player({ currentTrack }: PlayerProps) {
+function Player({ currentTrack, isEmbed = false }: PlayerProps) {
     const [playList, setPlayList] = useState<any[]>([]);
     const [isAudioReady, setIsAudioReady] = useState(false);
     const [audioError, setAudioError] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [waitingForInteraction, setWaitingForInteraction] = useState(false);
     const width = useWindowWidth();
     let screenSize = width > 1400 ? 'big' : 'medium';
     width < 1100 && (screenSize = 'small');
@@ -37,6 +39,12 @@ function Player({ currentTrack }: PlayerProps) {
     const audioElementRef = useRef<HTMLAudioElement | null>(null);
     // Référence pour suivre la dernière piste jouée et éviter les sauts
     const lastTrackIdRef = useRef<string | null>(null);
+    // Référence pour savoir si on doit lire la prochaine piste automatiquement
+    const shouldAutoPlayRef = useRef(false);
+    // Référence pour savoir si l'utilisateur a déjà interagi avec le lecteur
+    const hasUserInteractedRef = useRef(false);
+    // Référence pour éviter la double synchronisation lors du changement de piste
+    const isChangingTrackRef = useRef(false);
 
     // Traitement de la piste reçue - optimisé pour éviter les re-renders inutiles
     useEffect(() => {
@@ -71,34 +79,15 @@ function Player({ currentTrack }: PlayerProps) {
             console.log('Loading new track in player:', formattedTrack.name);
             setPlayList([formattedTrack]);
             setIsAudioReady(true);
+
+            // Si la lecture automatique est demandée (fin de piste précédente)
+            if (shouldAutoPlayRef.current) {
+                setIsPlaying(true);
+                shouldAutoPlayRef.current = false;
+            }
         }
 
         setAudioError(null);
-
-        // Si c'est un changement de piste (nouvelle chanson), synchroniser automatiquement avec fade
-        if (currentTrack.isTrackChange && audioElementRef.current) {
-            setTimeout(() => {
-                if (audioElementRef.current && currentTrack.elapsed !== undefined) {
-                    console.log(`Track change detected, syncing to ${currentTrack.elapsed}s`);
-
-                    // Pour un changement de piste, démarrer avec un fade in très doux
-                    const targetTime = currentTrack.elapsed;
-                    audioElementRef.current.currentTime = targetTime;
-                    audioElementRef.current.volume = 0.1; // Volume bas au démarrage
-
-                    // Fade in très progressif pour éviter les à-coups
-                    let currentVol = 0.1;
-                    const fadeInterval = setInterval(() => {
-                        if (audioElementRef.current && currentVol < 1.0) {
-                            currentVol += 0.05; // Augmentation très graduelle
-                            audioElementRef.current.volume = Math.min(currentVol, 1.0);
-                        } else {
-                            clearInterval(fadeInterval);
-                        }
-                    }, 50); // Fade in sur ~1 seconde
-                }
-            }, 800); // Délai augmenté pour permettre un chargement complet
-        }
     }, [currentTrack?.audio, currentTrack?._id, currentTrack?.isTrackChange, playList.length]); // Dépendances optimisées
 
     // Configuration du lecteur audio et synchronisation
@@ -108,24 +97,118 @@ function Player({ currentTrack }: PlayerProps) {
         let isMounted = true;
 
         // Configuration après le montage du composant
-        const setupAudio = () => {
-            const audioElement = document.querySelector("audio");
-            if (!audioElement || !isMounted) return;
+        const setupAudio = (retryCount = 0) => {
+            if (!isMounted) return;
 
-            audioElementRef.current = audioElement;
+            // Utiliser la ref si disponible, sinon chercher dans le DOM
+            const audioElement = audioElementRef.current || document.querySelector("audio");
+
+            // Si l'élément audio n'est pas encore présent, réessayer
+            if (!audioElement) {
+                if (retryCount < 50) { // Essayer pendant 5 secondes max (50 * 100ms)
+                    setTimeout(() => setupAudio(retryCount + 1), 100);
+                } else {
+                    console.error("Audio element not found after 5 seconds");
+                }
+                return;
+            }
+
+            // Assurer que la ref est à jour si on l'a trouvé via querySelector
+            if (!audioElementRef.current) {
+                audioElementRef.current = audioElement as HTMLAudioElement;
+            }
 
             // Définir le temps initial seulement si c'est une nouvelle piste
             if (currentTrack?._id && currentTrack._id !== lastTrackIdRef.current) {
                 if (currentTrack.elapsed) {
                     audioElement.currentTime = currentTrack.elapsed;
                 }
+
+                // Si c'est un changement de piste, appliquer un fade-in immédiat
+                if (currentTrack.isTrackChange) {
+                    isChangingTrackRef.current = true;
+                    // Réactiver la synchro après 5 secondes (le temps que tout se stabilise)
+                    setTimeout(() => {
+                        isChangingTrackRef.current = false;
+                    }, 5000);
+
+                    audioElement.volume = 0;
+                    let currentVol = 0;
+                    const fadeInterval = setInterval(() => {
+                        if (!isMounted) {
+                            clearInterval(fadeInterval);
+                            return;
+                        }
+                        if (currentVol < 1.0) {
+                            currentVol += 0.05;
+                            audioElement.volume = Math.min(currentVol, 1.0);
+                        } else {
+                            clearInterval(fadeInterval);
+                        }
+                    }, 50);
+                }
+
                 lastTrackIdRef.current = currentTrack._id;
             }
+
+            // Tentative d'autoplay intelligent
+            const attemptPlay = async () => {
+                try {
+                    await audioElement.play();
+                } catch (error) {
+                    console.log("Autoplay prevented by browser, waiting for interaction");
+                    // Attendre 4 secondes avant d'afficher le message
+                    setTimeout(() => {
+                        // Vérifier si l'audio est toujours en pause et si l'utilisateur n'a pas interagi entre temps
+                        if (audioElement.paused && !hasUserInteractedRef.current) {
+                            setWaitingForInteraction(true);
+                        }
+                    }, 4000);
+                }
+            };
+
+            // Fallback : Jouer au premier clic/touche sur la page
+            const handleInteraction = (e: Event) => {
+                // Si l'utilisateur a déjà interagi, on ne fait rien
+                if (hasUserInteractedRef.current) {
+                    document.removeEventListener('click', handleInteraction);
+                    document.removeEventListener('keydown', handleInteraction);
+                    return;
+                }
+
+                // Si l'élément cliqué est un bouton ou un lien, on ne force pas la lecture
+                // sauf si c'est l'overlay d'interaction
+                const target = e.target as HTMLElement;
+                const isInteractive = target.closest('button') || target.closest('a') || target.closest('[role="button"]');
+
+                if (isInteractive && !target.closest(`.${styles.interactionOverlay}`)) {
+                    // On considère que c'est une interaction utilisateur valide
+                    hasUserInteractedRef.current = true;
+                    document.removeEventListener('click', handleInteraction);
+                    document.removeEventListener('keydown', handleInteraction);
+                    return;
+                }
+
+                attemptPlay();
+                setWaitingForInteraction(false);
+                hasUserInteractedRef.current = true;
+                // On retire les écouteurs après la première interaction
+                document.removeEventListener('click', handleInteraction);
+                document.removeEventListener('keydown', handleInteraction);
+            };
 
             // Gestionnaires d'événements
             const handlePlay = async () => {
                 if (!isMounted) return;
                 setIsPlaying(true);
+                setWaitingForInteraction(false);
+                shouldAutoPlayRef.current = false; // Reset on manual play
+                hasUserInteractedRef.current = true;
+
+                // Si la lecture a commencé, on n'a plus besoin des écouteurs d'interaction
+                document.removeEventListener('click', handleInteraction);
+                document.removeEventListener('keydown', handleInteraction);
+
                 // À chaque fois que l'utilisateur appuie sur play, se synchroniser avec la radio
                 await syncWithRadio();
             };
@@ -133,6 +216,7 @@ function Player({ currentTrack }: PlayerProps) {
             const handlePause = () => {
                 if (!isMounted) return;
                 setIsPlaying(false);
+                hasUserInteractedRef.current = true;
                 // L'utilisateur peut mettre en pause, la radio continue côté serveur
             };
 
@@ -143,6 +227,7 @@ function Player({ currentTrack }: PlayerProps) {
 
             const handleEnded = async () => {
                 if (!isMounted || !currentTrack?._id) return;
+                shouldAutoPlayRef.current = true; // Set on ended
                 try {
                     await incrementRadioPlayCount(currentTrack._id);
                     console.log("Radio play count incremented for song:", currentTrack._id);
@@ -157,30 +242,28 @@ function Player({ currentTrack }: PlayerProps) {
             audioElement.addEventListener("error", handleError);
             audioElement.addEventListener("ended", handleEnded);
 
-            // Tentative d'autoplay intelligent
-            const attemptPlay = async () => {
-                try {
-                    if (audioElement.paused) {
-                        await audioElement.play();
-                    }
-                } catch (error) {
-                    console.log("Autoplay prevented by browser, waiting for interaction");
+
+            // Définir le temps initial seulement si c'est une nouvelle piste
+            if (currentTrack?._id && currentTrack._id !== lastTrackIdRef.current) {
+                if (currentTrack.elapsed) {
+                    audioElement.currentTime = currentTrack.elapsed;
                 }
-            };
-
-            // Essayer de jouer immédiatement
-            attemptPlay();
-
-            // Fallback : Jouer au premier clic/touche sur la page
-            const handleInteraction = () => {
+                lastTrackIdRef.current = currentTrack._id;
+                // Essayer de jouer seulement si c'est une nouvelle piste
                 attemptPlay();
-                // On retire les écouteurs après la première interaction
-                document.removeEventListener('click', handleInteraction);
-                document.removeEventListener('keydown', handleInteraction);
-            };
+            } else if (!lastTrackIdRef.current) {
+                // Première initialisation
+                attemptPlay();
+            } else if (audioElement.paused && !hasUserInteractedRef.current && !waitingForInteraction) {
+                // Si on est en pause, qu'on n'a pas interagi, et qu'on n'attend pas d'interaction
+                // C'est probablement un raté de l'autoplay (ex: Strict Mode), on réessaie
+                attemptPlay();
+            }
 
-            document.addEventListener('click', handleInteraction);
-            document.addEventListener('keydown', handleInteraction);
+            if (!hasUserInteractedRef.current) {
+                document.addEventListener('click', handleInteraction);
+                document.addEventListener('keydown', handleInteraction);
+            }
 
             return () => {
                 audioElement.removeEventListener("play", handlePlay);
@@ -194,8 +277,14 @@ function Player({ currentTrack }: PlayerProps) {
 
         // Synchronisation intelligente avec la radio (position actuelle)
         const syncWithRadio = async () => {
+            // Ne pas synchroniser si on est en train de changer de piste
+            if (isChangingTrackRef.current) {
+                console.log("Sync skipped: Track change in progress");
+                return;
+            }
+
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/player/status`);
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/player/status`);
                 const data = await res.json();
 
                 if (!audioElementRef.current || typeof data.elapsed !== 'number') return;
@@ -241,24 +330,35 @@ function Player({ currentTrack }: PlayerProps) {
             }
         };
 
-        // Démarrer la configuration après un court délai
-        const timerId = setTimeout(setupAudio, 300);
+        // Démarrer la configuration
+        setupAudio();
 
         return () => {
             isMounted = false;
-            clearTimeout(timerId);
         };
     }, [isAudioReady, currentTrack]);
 
     return (
-        <div className={styles.audioPlayer}>
-            {isAudioReady && playList.length > 0 ? (
-                <div className={styles.audioPlayer}>
+        <>
+            {waitingForInteraction && (
+                <div className={styles.interactionOverlay} onClick={() => {
+                    const audioElement = document.querySelector("audio");
+                    if (audioElement) audioElement.play();
+                    setWaitingForInteraction(false);
+                }}>
+                    <div className={styles.interactionMessage}>
+                        Click anywhere to start the radio 🎵
+                    </div>
+                </div>
+            )}
+            <div className={`${styles.audioPlayer} ${isEmbed ? styles.embedPlayer : ''}`}>
+                {isAudioReady && playList.length > 0 ? (
                     <AudioPlayer
+                        audioRef={audioElementRef}
                         playList={playList}
                         audioInitialState={{
                             muted: false,
-                            isPlaying: true,
+                            isPlaying: isPlaying,
                             curPlayId: playList[0].id,
                         }}
                         placement={{
@@ -273,22 +373,30 @@ function Player({ currentTrack }: PlayerProps) {
                         }}
                         activeUI={{
                             all: true,
-                            progress: "waveform",
+                            progress: isEmbed ? false : (screenSize === "small" ? false : "waveform"),
                             playList: false,
                             repeatType: false,
                             prevNnext: false,
-                            trackInfo: screenSize === "big",
-                            artwork: !(screenSize === "small"),
+                            trackInfo: isEmbed ? false : screenSize === "big",
+                            artwork: isEmbed ? false : !(screenSize === "small"),
+                            volume: isEmbed ? false : screenSize !== "small",
+                            volumeSlider: isEmbed ? false : screenSize !== "small",
+                            trackTime: isEmbed ? false : screenSize !== "small",
                         }}
-                        rootContainerProps={{ width: (screenSize === "small") ? "45%" : "52.2%", minWidth: "300px", maxWidth: "2000px" }}
+                        rootContainerProps={{
+                            width: isEmbed ? "auto" : ((screenSize === "small") ? "100%" : "52.2%"),
+                            minWidth: isEmbed ? "auto" : ((screenSize === "small") ? "auto" : "300px"),
+                            maxWidth: "2000px",
+                            UNSAFE_className: isEmbed ? undefined : ((screenSize === "small") ? styles.mobileRoot : undefined)
+                        }}
                     />
-                </div>
-            ) : (
-                <div className={styles.audioPlayerLoading}>
-                    {audioError || "Chargement du lecteur..."}
-                </div>
-            )}
-        </div>
+                ) : (
+                    <div className={styles.audioPlayerLoading}>
+                        {audioError || "Chargement du lecteur..."}
+                    </div>
+                )}
+            </div>
+        </>
     );
 }
 

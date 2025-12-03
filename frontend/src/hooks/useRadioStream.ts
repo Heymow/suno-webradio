@@ -7,7 +7,7 @@ const ERROR_MESSAGES = {
     SESSION_EXPIRED: 'Session expirée, reconnexion...'
 };
 
-const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/player/connection`;
+const SSE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/player/connection`;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
@@ -160,7 +160,7 @@ export const useRadioStream = () => {
                     setNextTrack(convertToSunoSong(data.track));
                 }
             } catch (error: any) {
-                console.error("Erreur lors de la récupération de la prochaine piste:", error);
+                console.error("Error fetching next track:", error);
                 if (error.response?.status === 401) {
                     snackBarRef.current(ERROR_MESSAGES.SESSION_EXPIRED, { variant: 'warning' });
                 }
@@ -190,7 +190,7 @@ export const useRadioStream = () => {
                         const data = JSON.parse(event.data);
                         handleTrackUpdate(data);
                     } catch (error) {
-                        console.error('Erreur lors du parsing des données SSE:', error);
+                        console.error('Error parsing SSE data:', error);
                     }
                 };
 
@@ -213,7 +213,7 @@ export const useRadioStream = () => {
                             connectSSE();
                         }, RECONNECT_DELAY * Math.pow(2, localReconnectAttempts));
                     } else {
-                        snackBarRef.current('Impossible de se connecter au serveur', { variant: 'error' });
+                        snackBarRef.current('Unable to connect to server', { variant: 'error' });
                     }
                 };
             } catch (error) {

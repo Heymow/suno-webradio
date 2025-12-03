@@ -12,9 +12,7 @@ exports.handleConnection = (req, res) => {
 exports.getStatus = (req, res) => {
   const trackState = playerService.getTrackState();
   if (!trackState)
-    return res
-      .status(404)
-      .json({ message: "Aucune piste en cours de lecture" });
+    return res.status(404).json({ message: "No track currently playing" });
 
   const now = Date.now();
   const elapsed = Math.floor((now - playerService.startTime) / 1000);
@@ -28,7 +26,7 @@ exports.getStatus = (req, res) => {
 exports.nextTrack = (req, res) => {
   const track = playerService.forceNextTrack();
   if (!track) {
-    return res.status(404).json({ message: "Playlist vide" });
+    return res.status(404).json({ message: "Playlist empty" });
   }
 
   res.json({
@@ -45,9 +43,36 @@ exports.nextTrack = (req, res) => {
 };
 
 exports.getNextTrackInfo = (req, res) => {
+  const count = parseInt(req.query.count) || 1;
+
+  if (count > 1) {
+    const nextTracks = playerService.getNextTracks(count);
+    if (!nextTracks || nextTracks.length === 0) {
+      return res.status(404).json({ message: "Playlist empty" });
+    }
+
+    return res.json({
+      tracks: nextTracks.map((track) => ({
+        name: track.name,
+        writer: track.writer,
+        src: track.src,
+        img: track.img,
+        duration: track.duration,
+        id: track.id,
+        prompt: track.prompt,
+        negative: track.negative,
+        avatarImage: track.avatarImage,
+        playCount: track.playCount,
+        upVoteCount: track.upVoteCount,
+        modelVersion: track.modelVersion,
+        lyrics: track.lyrics,
+      })),
+    });
+  }
+
   const nextTrack = playerService.getNextTrackInfo();
   if (!nextTrack) {
-    return res.status(404).json({ message: "Playlist vide" });
+    return res.status(404).json({ message: "Playlist empty" });
   }
 
   res.json({

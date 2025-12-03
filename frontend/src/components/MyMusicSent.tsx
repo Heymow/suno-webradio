@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Stack, IconButton } from '@mui/material';
-import { useAppSelector } from '../store/hooks';
-import { selectCurrentUserId } from '../store/authStore';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { selectCurrentUserId, updateUserProfile } from '../store/authStore';
 import styles from '../styles/MyMusicSent.module.css';
 import Axios from '../utils/Axios';
 import LightSunoCard from './LightSunoCard';
@@ -12,8 +12,8 @@ import { submitSunoLink } from '../services/suno.services';
 
 // Constants
 const ERROR_MESSAGES = {
-    INVALID_LINK: 'Le format du lien Suno est invalide. Exemple: https://suno.ai/song/123... ou https://suno.com/song/123...',
-    EMPTY_LINK: 'Veuillez entrer un lien Suno'
+    INVALID_LINK: 'Invalid Suno link format. Example: https://suno.ai/song/123... or https://suno.com/song/123...',
+    EMPTY_LINK: 'Please enter a Suno link'
 };
 
 const SUNO_LINK_REGEX = /suno\.(ai|com)\/song\/([a-f0-9-]+)/i;
@@ -26,6 +26,7 @@ const MyMusicSent = () => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [songToDelete, setSongToDelete] = useState<SunoSong | null>(null);
     const userId = useAppSelector(selectCurrentUserId);
+    const dispatch = useAppDispatch();
     const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
@@ -75,16 +76,26 @@ const MyMusicSent = () => {
 
         setIsSubmitting(true);
         try {
-            await submitSunoLink(sunoLink);
+            const response = await submitSunoLink(sunoLink);
+
+            // Update user profile if data is returned
+            if (response.user) {
+                dispatch(updateUserProfile({
+                    sunoUsername: response.user.sunoUsername,
+                    avatar: response.user.avatar,
+                    isActivated: response.user.isActivated
+                }));
+            }
+
             setSunoLink("");
             setClickedPlusButton(false);
-            enqueueSnackbar('Musique ajoutée avec succès !', { variant: 'success' });
+            enqueueSnackbar('Song added successfully!', { variant: 'success' });
             // Refresh songs list
-            const response = await Axios.get(`/users/${userId}/my-music-sent`);
-            setSongs(response.data);
+            const songsResponse = await Axios.get(`/users/${userId}/my-music-sent`);
+            setSongs(songsResponse.data);
         } catch (error: any) {
             enqueueSnackbar(
-                error.response?.data?.message || 'Erreur lors de l\'ajout de la musique',
+                error.response?.data?.message || 'Error adding song',
                 { variant: 'error' }
             );
         } finally {
@@ -103,10 +114,10 @@ const MyMusicSent = () => {
         try {
             await Axios.delete(`/users/${userId}/my-music-sent/${songToDelete._id}`);
             setSongs(songs.filter(song => song._id !== songToDelete._id));
-            enqueueSnackbar('Musique supprimée avec succès', { variant: 'success' });
+            enqueueSnackbar('Song deleted successfully', { variant: 'success' });
         } catch (error) {
             console.error("Error deleting song:", error);
-            enqueueSnackbar('Erreur lors de la suppression de la musique', { variant: 'error' });
+            enqueueSnackbar('Error deleting song', { variant: 'error' });
         } finally {
             setDeleteDialogOpen(false);
             setSongToDelete(null);
@@ -130,13 +141,17 @@ const MyMusicSent = () => {
                 className={styles.plusButton}
                 onClick={handleSubmitSong}
                 disabled={isSubmitting}
-            />
+            >
+                {isSubmitting ? "..." : "+"}
+            </button>
         </div>
     ) : (
         <button
             className={styles.openPlusButton}
             onClick={() => setClickedPlusButton(true)}
-        />
+        >
+            +
+        </button>
     );
 
     return (
@@ -165,15 +180,7 @@ const MyMusicSent = () => {
                                                     />
                                                 </Box>
                                                 <Box className={styles.radioStats}>
-                                                    <Typography variant="body2" className={styles.statItem}>
-                                                        <span className={styles.statLabel}>Radio Votes:</span>
-                                                        <span className={styles.statValue}>{song.radioVoteCount}</span>
-                                                    </Typography>
-                                                    <Typography variant="body2" className={styles.statItem}>
-                                                        <span className={styles.statLabel}>Radio Plays:</span>
-                                                        <span className={styles.statValue}>{song.radioPlayCount}</span>
-                                                    </Typography>
-                                                    <Typography variant="body2" className={styles.statItem}>
+                                                    <Typography variant="body2" className={styles.statItem} sx={{ flexDirection: 'row', gap: '8px', width: '100%', justifyContent: 'center' }}>
                                                         <span className={styles.statLabel}>Next Play:</span>
                                                         <span className={styles.statValue}>{song.timeUntilPlay || "Coming soon"}</span>
                                                     </Typography>

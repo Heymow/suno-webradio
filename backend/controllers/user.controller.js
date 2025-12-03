@@ -12,7 +12,7 @@ exports.createUser = async (req, res) => {
     res.cookie("refreshToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -85,7 +85,7 @@ exports.loginUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -105,11 +105,41 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.googleLogin = async (req, res) => {
+  try {
+    const { token: idToken } = req.body;
+    const result = await userService.googleLogin(idToken);
+
+    const { user, token, refreshToken } = result;
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        likesRemainingToday: user.likesRemainingToday,
+        sunoUsername: user.sunoUsername,
+        email: user.email,
+        avatar: user.avatar,
+      },
+      token,
+    });
+  } catch (error) {
+    handleError(res, error, "error logging in with google");
+  }
+};
+
 exports.refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(401).json({ message: "Refresh token manquant" });
+      return res.status(401).json({ message: "Missing refresh token" });
     }
 
     const jwt = require("jsonwebtoken");
@@ -131,7 +161,7 @@ exports.refreshToken = async (req, res) => {
       });
     } catch (error) {
       console.error("Error verifying refresh token:", error);
-      return res.status(401).json({ message: "Refresh token invalide" });
+      return res.status(401).json({ message: "Invalid refresh token" });
     }
   } catch (error) {
     console.error("Error in refreshToken:", error);
@@ -143,13 +173,13 @@ exports.getPulsifyId = async (req, res) => {
   try {
     const userId = req.params.id;
     if (!userId || userId === "null" || userId === "undefined") {
-      return res.status(400).json({ message: "ID utilisateur invalide" });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
     const result = await userService.getPulsifyId(userId);
     res.status(200).json(result);
   } catch (error) {
-    handleError(res, error, "Erreur lors de la récupération du pulsifyId");
+    handleError(res, error, "Error retrieving pulsifyId");
   }
 };
 
@@ -160,12 +190,12 @@ exports.activatePulsifyAccount = async (req, res) => {
 
     const user = await userService.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     if (!user.pulsifyId || !user.pulsifyIdGenerationDate) {
       return res.status(400).json({
-        message: "Aucun pulsifyId n'a été généré pour cet utilisateur",
+        message: "No pulsifyId generated for this user",
       });
     }
 
@@ -176,8 +206,7 @@ exports.activatePulsifyAccount = async (req, res) => {
     if (timeDiff > 20) {
       const result = await userService.getPulsifyId(userId);
       return res.status(400).json({
-        message:
-          "Le délai d'activation a expiré. Un nouveau pulsifyId a été généré.",
+        message: "Activation time expired. A new pulsifyId has been generated.",
         pulsifyId: result.pulsifyId,
         generationDate: result.generationDate,
       });
@@ -188,7 +217,7 @@ exports.activatePulsifyAccount = async (req, res) => {
       sunoLink.match(/suno\.ai\/song\/([a-f0-9-]+)/i) ||
       sunoLink.match(/suno\.com\/song\/([a-f0-9-]+)/i);
 
-    if (!match) return res.status(400).json({ message: "Lien invalide" });
+    if (!match) return res.status(400).json({ message: "Invalid link" });
 
     const sunoSong = await sunoService.getClip(match[1]);
 
@@ -198,18 +227,45 @@ exports.activatePulsifyAccount = async (req, res) => {
       });
     }
 
+    // Fetch user data from Suno to update profile
+    try {
+      const sunoUserId = sunoSong.user_id; // Assuming user_id is available in song data
+      if (sunoUserId) {
+        const sunoUser = await sunoService.getUser(sunoUserId);
+        if (sunoUser) {
+          user.username =
+            sunoUser.display_name || sunoUser.handle || user.username;
+          user.sunoUsername = sunoUser.handle || sunoUser.display_name;
+          if (sunoUser.avatar_url) {
+            user.avatar = sunoUser.avatar_url;
+          }
+        }
+      } else {
+        // Fallback if user_id is not directly in song object, try to use handle/display_name from song
+        user.sunoUsername = sunoSong.handle || sunoSong.display_name;
+      }
+    } catch (err) {
+      console.error("Error fetching Suno user data:", err);
+      // Continue activation even if fetching user details fails
+    }
+
     user.pulsifyActivationDate = new Date();
     user.claimed = true;
     await user.save();
 
     res.status(200).json({
-      message: "Compte Pulsify activé avec succès",
+      message: "Pulsify account activated successfully",
       result: true,
       pulsifyId: user.pulsifyId,
       activationDate: user.pulsifyActivationDate,
+      user: {
+        username: user.username,
+        avatar: user.avatar,
+        sunoUsername: user.sunoUsername,
+      },
     });
   } catch (error) {
-    handleError(res, error, "Erreur lors de l'activation du compte Pulsify");
+    handleError(res, error, "Error activating Pulsify account");
   }
 };
 
@@ -217,12 +273,12 @@ exports.getActivationStatus = async (req, res) => {
   try {
     const userId = req.params.userId;
     if (!userId || userId === "null" || userId === "undefined") {
-      return res.status(400).json({ message: "ID utilisateur invalide" });
+      return res.status(400).json({ message: "Invalid user ID" });
     }
 
     const user = await userService.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json({
@@ -230,11 +286,7 @@ exports.getActivationStatus = async (req, res) => {
       activationDate: user.pulsifyActivationDate || null,
     });
   } catch (error) {
-    handleError(
-      res,
-      error,
-      "Erreur lors de la vérification du statut d'activation"
-    );
+    handleError(res, error, "Error checking activation status");
   }
 };
 
@@ -245,15 +297,11 @@ exports.getMyMusicSent = async (req, res) => {
     const userWithMusic = await User.findById(userId).populate("myMusicSent");
 
     if (!userWithMusic) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
     res.status(200).json(userWithMusic.myMusicSent);
   } catch (error) {
-    handleError(
-      res,
-      error,
-      "Erreur lors de la récupération des musiques envoyées"
-    );
+    handleError(res, error, "Error retrieving sent music");
   }
 };
 
@@ -264,12 +312,12 @@ exports.getUserAnalyses = async (req, res) => {
     const user = await User.findById(userId).populate("analyses");
 
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user.analyses || []);
   } catch (error) {
-    handleError(res, error, "Erreur lors de la récupération des analyses");
+    handleError(res, error, "Error retrieving analyses");
   }
 };
 
@@ -279,18 +327,18 @@ exports.addUserAnalyse = async (req, res) => {
     const { sunoLink } = req.body;
 
     if (!sunoLink) {
-      return res.status(400).json({ message: "Le lien Suno est requis" });
+      return res.status(400).json({ message: "Suno link is required" });
     }
 
     const user = await userService.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     if (user.analyses && user.analyses.length >= 5) {
       return res
         .status(400)
-        .json({ message: "Nombre maximum d'analyses atteint (5)" });
+        .json({ message: "Maximum number of analyses reached (5)" });
     }
 
     const newAnalyse = {
@@ -307,7 +355,7 @@ exports.addUserAnalyse = async (req, res) => {
 
     res.status(201).json(newAnalyse);
   } catch (error) {
-    handleError(res, error, "Erreur lors de l'ajout de l'analyse");
+    handleError(res, error, "Error adding analysis");
   }
 };
 
@@ -318,7 +366,7 @@ exports.deleteUserAnalyse = async (req, res) => {
 
     const user = await userService.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     user.analyses = user.analyses.filter(
@@ -326,10 +374,10 @@ exports.deleteUserAnalyse = async (req, res) => {
     );
     await user.save();
 
-    res.status(200).json({ message: "Analyse supprimée avec succès" });
+    res.status(200).json({ message: "Analysis deleted successfully" });
   } catch (error) {
     console.error("Error deleting analyse:", error);
-    handleError(res, error, "Erreur lors de la suppression de l'analyse");
+    handleError(res, error, "Error deleting analysis");
   }
 };
 
@@ -340,7 +388,7 @@ exports.deleteUserMusicSent = async (req, res) => {
 
     const user = await userService.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const sunoSong = await SunoSong.findById(songId);
@@ -380,10 +428,10 @@ exports.deleteUserMusicSent = async (req, res) => {
       await playlist.save();
     }
 
-    res.status(200).json({ message: "Musique supprimée avec succès" });
+    res.status(200).json({ message: "Music deleted successfully" });
   } catch (error) {
     console.error("Error deleting music:", error);
-    handleError(res, error, "Erreur lors de la suppression de la musique");
+    handleError(res, error, "Error deleting music");
   }
 };
 
@@ -441,7 +489,31 @@ exports.claimAccount = async (req, res) => {
 
     if (prompt.includes(user.pulsifyId) || tags.includes(user.pulsifyId)) {
       // Verification successful
-      user.sunoUsername = songData.display_name || songData.handle;
+
+      // Try to fetch full Suno profile to get the latest avatar/name
+      if (songData.user_id) {
+        user.sunoUserId = songData.user_id;
+        try {
+          const sunoProfile = await sunoService.getUser(songData.user_id);
+          user.sunoUsername = sunoProfile.display_name || sunoProfile.handle;
+          if (sunoProfile.avatar_image_url) {
+            user.avatar = sunoProfile.avatar_image_url;
+          }
+        } catch (error) {
+          console.error("Error fetching Suno user profile:", error);
+          // Fallback to song data
+          user.sunoUsername = songData.display_name || songData.handle;
+          if (songData.avatar_image_url) {
+            user.avatar = songData.avatar_image_url;
+          }
+        }
+      } else {
+        user.sunoUsername = songData.display_name || songData.handle;
+        if (songData.avatar_image_url) {
+          user.avatar = songData.avatar_image_url;
+        }
+      }
+
       user.claimed = true;
       user.pulsifyActivationDate = new Date();
       await user.save();

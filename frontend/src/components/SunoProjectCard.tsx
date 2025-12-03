@@ -161,12 +161,12 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
             display: 'flex',
             alignItems: 'flex-start',
             marginInline: 'auto',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            backgroundColor: 'transparent',
             borderRadius: '4px',
             maxHeight: '60vh',
             marginTop: '1vh',
         }}>
-            <Card sx={{ maxWidth: 345, maxHeight: '60vh', minWidth: '30vw' }}>
+            <Card sx={{ maxWidth: 345, maxHeight: '60vh', minWidth: '30vw', backgroundColor: 'transparent', boxShadow: 'none' }}>
                 <CardMedia
                     component="img"
                     height="194"
@@ -177,7 +177,14 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                 />
                 <CardHeader
                     className={styles.cardHeader}
-                    sx={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', position: 'relative', zIndex: 2 }}
+                    sx={{
+                        backgroundColor: 'rgba(30, 30, 40, 0.6)',
+                        backdropFilter: 'blur(10px)',
+                        position: 'relative',
+                        zIndex: 2,
+                        color: 'white',
+                        '& .MuiCardHeader-subheader': { color: 'rgba(255, 255, 255, 0.7)' }
+                    }}
                     avatar={
                         <Avatar
                             sx={{
@@ -233,12 +240,12 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                     </Typography>}
 
                 />
-                <CardContent sx={{ backgroundColor: 'rgba(240, 230, 240, 0.7)', position: 'relative', zIndex: 2 }}>
-                    <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column' }}>
+                <CardContent sx={{ backgroundColor: 'rgba(30, 30, 40, 0.6)', backdropFilter: 'blur(10px)', position: 'relative', zIndex: 2 }}>
+                    <Box sx={{ color: 'rgba(255, 255, 255, 0.8)', display: 'flex', flexDirection: 'column' }}>
                         Style of Music : {prompt}
                         {negativePrompt && <Typography sx={{ paddingTop: '5px' }}>Exclude Styles : {negativePrompt}</Typography>}
                         <Tooltip title="Suno AI model version">
-                            <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", fontSize: "12px", cursor: 'default' }} />
+                            <Chip label={props.modelVersion} size="small" sx={{ width: "100%", maxWidth: "fit-content", marginTop: "15px", fontSize: "12px", cursor: 'default', backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'white' }} />
                         </Tooltip>
                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                             <button
@@ -258,21 +265,22 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                                     <Chip
                                         sx={{
                                             height: '24px',
-                                            backgroundColor: '#9c27b0',
-                                            color: 'white',
+                                            backgroundColor: 'rgba(156, 39, 176, 0.2)',
+                                            border: '1px solid rgba(156, 39, 176, 0.3)',
+                                            color: '#e0e0e0',
                                             fontSize: '11px',
                                             cursor: 'default'
                                         }}
                                         label={
                                             (props.radioPlayCount || 0) >= 1000 ?
                                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#ffeb3b' }} />
+                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#d05ce3' }} />
                                                     <span style={{ marginLeft: "4px", fontSize: '14px' }}>
                                                         {Math.floor((props.radioPlayCount || 0) / 1000) + "K"}
                                                     </span>
                                                 </div> :
                                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#ffeb3b' }} />
+                                                    <MusicNoteIcon fontSize='small' sx={{ fontSize: '14px', color: '#d05ce3' }} />
                                                     <span style={{ marginLeft: "4px", fontSize: '14px' }}>
                                                         {props.radioPlayCount || 0}
                                                     </span>
@@ -284,8 +292,9 @@ export default function SunoProjectCard(props: SunoSong): JSX.Element {
                                     <Chip
                                         sx={{
                                             height: '24px',
-                                            backgroundColor: hasVoted ? '#4caf50' : '#ff6b35',
-                                            color: 'white',
+                                            backgroundColor: hasVoted ? 'rgba(0, 198, 255, 0.2)' : 'rgba(255, 107, 53, 0.2)',
+                                            border: hasVoted ? '1px solid rgba(0, 198, 255, 0.3)' : '1px solid rgba(255, 107, 53, 0.3)',
+                                            color: '#e0e0e0',
                                             fontWeight: 'bold',
                                             fontSize: '13px',
                                             cursor: 'default'

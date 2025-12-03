@@ -23,6 +23,9 @@ const generatePulsifyId = () => {
 // Fonction pour valider le format Base64
 const isValidBase64 = (str) => {
   if (!str || str === "default-avatar.png") return true;
+  // Allow URLs
+  if (str.startsWith("http://") || str.startsWith("https://")) return true;
+
   try {
     // Vérifie si la chaîne commence par data:image/
     if (!str.match(/^data:image\//)) return false;
@@ -38,6 +41,10 @@ const isValidBase64 = (str) => {
 // Fonction pour vérifier le type MIME
 const isAllowedMimeType = (base64String) => {
   if (!base64String || base64String === "default-avatar.png") return true;
+  // Allow URLs
+  if (base64String.startsWith("http://") || base64String.startsWith("https://"))
+    return true;
+
   try {
     const mime = base64String.match(
       /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/
@@ -51,6 +58,10 @@ const isAllowedMimeType = (base64String) => {
 // Fonction pour vérifier la taille
 const isValidSize = (base64String) => {
   if (!base64String || base64String === "default-avatar.png") return true;
+  // Allow URLs
+  if (base64String.startsWith("http://") || base64String.startsWith("https://"))
+    return true;
+
   try {
     const base64Data = base64String.split(",")[1];
     const sizeInBytes = Buffer.from(base64Data, "base64").length;
@@ -64,7 +75,7 @@ const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     pulsifyId: {
       type: String,
       required: false,
@@ -105,6 +116,11 @@ const userSchema = new mongoose.Schema(
       ],
     },
     sunoUsername: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    sunoUserId: {
       type: String,
       required: false,
       default: null,

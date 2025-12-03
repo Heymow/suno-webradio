@@ -64,11 +64,11 @@ const compressImage = (file: File): Promise<File> => {
 export const processAvatar = async (file: File): Promise<string> => {
     try {
         if (!validateMimeType(file)) {
-            throw new Error('Type de fichier non autorisé. Types acceptés : JPEG, PNG, GIF, WEBP');
+            throw new Error('File type not allowed. Accepted types: JPEG, PNG, GIF, WEBP');
         }
         const compressedFile = await compressImage(file);
         return await convertToBase64(compressedFile);
     } catch (error) {
-        throw error instanceof Error ? error : new Error('Erreur lors du traitement de l\'avatar');
+        throw error instanceof Error ? error : new Error('Error processing avatar');
     }
 }; 

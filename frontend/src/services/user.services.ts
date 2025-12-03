@@ -21,6 +21,16 @@ export const loginUser = async (loginData: { email: string; password: string; })
     }
 };
 
+export const googleLogin = async (token: string) => {
+    try {
+        const response = await Axios.post('/users/google-login', { token });
+        return response.data;
+    } catch (error: any) {
+        console.error('Error in googleLogin:', error.response?.data || error.message);
+        return null;
+    }
+};
+
 export const refreshAccessToken = async () => {
     try {
         const response = await Axios.post('/users/refresh-token', {}, {

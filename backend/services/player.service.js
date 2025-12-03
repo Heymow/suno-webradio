@@ -231,31 +231,28 @@ class PlayerService {
 
     if (this.track) {
       console.log("PlayerService: Sending initial state to client");
-      const nextIndex = (this.currentTrackIndex + 1) % this.playlist.length;
-      const nextTrack = this.playlist[nextIndex];
+      const nextTracks = this.getNextTracks(2);
 
       const initialState = {
         ...this.getTrackState(),
         elapsed: Math.floor((Date.now() - this.startTime) / 1000),
         isTrackChange: false,
         previousTrack: this.previousTrack,
-        nextTrack: nextTrack
-          ? {
-              name: nextTrack.name,
-              writer: nextTrack.writer,
-              src: nextTrack.src,
-              img: nextTrack.img,
-              duration: nextTrack.duration,
-              id: nextTrack.id,
-              prompt: nextTrack.prompt,
-              negative: nextTrack.negative,
-              avatarImage: nextTrack.avatarImage,
-              playCount: nextTrack.playCount,
-              upVoteCount: nextTrack.upVoteCount,
-              modelVersion: nextTrack.modelVersion,
-              lyrics: nextTrack.lyrics,
-            }
-          : null,
+        nextTracks: nextTracks.map((t) => ({
+          name: t.name,
+          writer: t.writer,
+          src: t.src,
+          img: t.img,
+          duration: t.duration,
+          id: t.id,
+          prompt: t.prompt,
+          negative: t.negative,
+          avatarImage: t.avatarImage,
+          playCount: t.playCount,
+          upVoteCount: t.upVoteCount,
+          modelVersion: t.modelVersion,
+          lyrics: t.lyrics,
+        })),
       };
       res.write(`data: ${JSON.stringify(initialState)}\n\n`);
     } else {
@@ -283,6 +280,16 @@ class PlayerService {
     if (this.playlist.length === 0) return null;
     const nextIndex = (this.currentTrackIndex + 1) % this.playlist.length;
     return this.playlist[nextIndex];
+  }
+
+  getNextTracks(count = 1) {
+    if (this.playlist.length === 0) return [];
+    const nextTracks = [];
+    for (let i = 1; i <= count; i++) {
+      const nextIndex = (this.currentTrackIndex + i) % this.playlist.length;
+      nextTracks.push(this.playlist[nextIndex]);
+    }
+    return nextTracks;
   }
 }
 

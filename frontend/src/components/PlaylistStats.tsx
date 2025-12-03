@@ -79,12 +79,12 @@ const PlaylistStats: React.FC = () => {
 
                     <div className={styles.statsCard}>
                         <div className={styles.statsHeader}>
-                            <h3>Comportement des utilisateurs</h3>
+                            <h3>User Behavior</h3>
                             <DonutLargeIcon fontSize="medium" />
                         </div>
                         <div className={styles.statsContent}>
-                            <p>Taux de complétion: <strong>73%</strong></p>
-                            <p>Taux de partage: <strong>18%</strong></p>
+                            <p>Completion Rate: <strong>73%</strong></p>
+                            <p>Share Rate: <strong>18%</strong></p>
                             <div className={styles.dataGrid}>
                                 <div className={styles.dataItem}>
                                     <span>Likes</span>
@@ -95,11 +95,11 @@ const PlaylistStats: React.FC = () => {
                                     <strong>62.7K</strong>
                                 </div>
                                 <div className={styles.dataItem}>
-                                    <span>Partages</span>
+                                    <span>Shares</span>
                                     <strong>14.3K</strong>
                                 </div>
                                 <div className={styles.dataItem}>
-                                    <span>Ajouts</span>
+                                    <span>Adds</span>
                                     <strong>28.9K</strong>
                                 </div>
                             </div>

@@ -11,6 +11,7 @@ const {
 // Routes publiques
 router.post("/", validate(createUserSchema), userController.createUser);
 router.post("/login", userController.loginUser);
+router.post("/google-login", userController.googleLogin);
 router.post("/refresh-token", userController.refreshToken);
 router.post("/:userId/activate", userController.activatePulsifyAccount);
 router.post("/claim/:id", verifyToken, userController.claimAccount);

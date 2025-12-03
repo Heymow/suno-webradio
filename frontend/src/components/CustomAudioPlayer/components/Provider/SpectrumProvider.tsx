@@ -27,6 +27,11 @@ export const SpectrumProvider: FC<PropsWithChildren<SpectrumProviderProps>> = ({
     left?: number;
     right?: number;
   }>();
+
+  // Extract className and UNSAFE_className to merge them and avoid passing className to Provider
+  const { className, UNSAFE_className, ...otherRootProps } = rootContainerProps || {};
+  const mergedClassName = `rm-audio-player-provider ${UNSAFE_className || ""} ${className || ""}`.trim();
+
   useLayoutEffect(() => {
     if (contextPlayerPlacement) {
       const placementValidation = () => {
@@ -61,9 +66,9 @@ export const SpectrumProvider: FC<PropsWithChildren<SpectrumProviderProps>> = ({
           ? "static"
           : "fixed"
       }
-      UNSAFE_className="rm-audio-player-provider"
+      UNSAFE_className={mergedClassName}
       {...placementState}
-      {...rootContainerProps}
+      {...otherRootProps}
     >
       {children}
     </Provider>

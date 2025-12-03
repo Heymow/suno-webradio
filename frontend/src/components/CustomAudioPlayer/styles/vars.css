@@ -1,5 +1,6 @@
 .rm-audio-player-provider {
-    --rm-audio-player-interface-container: #080819;
+    background-color: transparent !important;
+    --rm-audio-player-interface-container: transparent;
     --rm-audio-player-volume-background: #ccc;
     --rm-audio-player-volume-panel-background: #f2f2f2;
     --rm-audio-player-volume-panel-border: #ccc;

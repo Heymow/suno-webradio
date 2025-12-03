@@ -9,7 +9,7 @@ import styles from '../../styles/ActivateAccountDialog.module.css';
 import Axios from '../../utils/Axios';
 import { useSnackbar } from 'notistack';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { setAccountActivated, selectCurrentUserId } from '../../store/authStore';
+import { setAccountActivated, selectCurrentUserId, setCredentials } from '../../store/authStore';
 
 interface ActivateAccountDialogProps {
     open: boolean;
@@ -35,6 +35,8 @@ const ActivateAccountDialog: React.FC<ActivateAccountDialogProps> = ({ open, onC
     const { enqueueSnackbar: snackBar } = useSnackbar();
     const dispatch = useAppDispatch();
     const userId = useAppSelector(selectCurrentUserId);
+    const user = useAppSelector(state => state.auth.user);
+    const token = useAppSelector(state => state.auth.token);
 
     // Réinitialiser l'état quand la boîte de dialogue s'ouvre/se ferme
     useEffect(() => {
@@ -113,8 +115,19 @@ const ActivateAccountDialog: React.FC<ActivateAccountDialogProps> = ({ open, onC
 
             const response = await verifyAccount(formattedLink, userId);
 
-            // Mettre à jour le store avec l'état d'activation
-            dispatch(setAccountActivated(true));
+            // Mettre à jour le store avec l'état d'activation et les nouvelles infos utilisateur
+            if (response.user && user && token) {
+                dispatch(setCredentials({
+                    token: token,
+                    username: response.user.username,
+                    sunoUsername: response.user.sunoUsername,
+                    avatar: response.user.avatar,
+                    _id: userId,
+                    isActivated: true
+                }));
+            } else {
+                dispatch(setAccountActivated(true));
+            }
 
             setSubmitted(true);
             snackBar('Account activation request submitted successfully!', {
