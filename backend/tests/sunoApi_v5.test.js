@@ -26,8 +26,7 @@ describe("Suno API Controller - v5 Response", () => {
     id: "6f2a9077-43ff-4a80-b6b4-c1cf09ea1264",
     entity_type: "song_schema",
     video_url: "",
-    audio_url:
-      "https://cdn1.suno.ai/6f2a9077-43ff-4a80-b6b4-c1cf09ea1264.mp3",
+    audio_url: "https://cdn1.suno.ai/6f2a9077-43ff-4a80-b6b4-c1cf09ea1264.mp3",
     image_url:
       "https://cdn2.suno.ai/image_6ba96bb9-e209-4b2a-a73b-81ca409f231e.jpeg",
     image_large_url:

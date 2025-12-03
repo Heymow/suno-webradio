@@ -114,12 +114,9 @@ describe("Suno API Controller", () => {
 
   describe("POST /suno-api/submit-link", () => {
     it("should successfully add a new song to the playlist", async () => {
-      const res = await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+      const res = await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(res.statusCode).toBe(201);
       expect(res.body.message).toBe("Song successfully added to the playlist");
@@ -135,13 +132,10 @@ describe("Suno API Controller", () => {
 
     it("should update user avatar if it differs from Suno profile", async () => {
       mockUser.avatar = "old_avatar.jpg";
-      
-      await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+
+      await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(mockUser.avatar).toBe(mockSunoUser.avatar_image_url);
       expect(mockUser.save).toHaveBeenCalled();
@@ -149,13 +143,10 @@ describe("Suno API Controller", () => {
 
     it("should reject if user is not claimed", async () => {
       mockUser.claimed = false;
-      
-      const res = await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+
+      const res = await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.message).toContain("verify your account");
@@ -163,13 +154,10 @@ describe("Suno API Controller", () => {
 
     it("should reject if user has no sunoUsername linked", async () => {
       mockUser.sunoUsername = null;
-      
-      const res = await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+
+      const res = await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.message).toContain("link your Suno account");
@@ -177,13 +165,10 @@ describe("Suno API Controller", () => {
 
     it("should reject if song author does not match user sunoUsername", async () => {
       mockUser.sunoUsername = "OtherUser";
-      
-      const res = await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+
+      const res = await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.message).toContain('This song belongs to "DiggerMc"');
@@ -195,13 +180,10 @@ describe("Suno API Controller", () => {
         { userId: "mockUserId" },
         { userId: "mockUserId" },
       ];
-      
-      const res = await request(app)
-        .post("/suno-api/submit-link")
-        .send({
-          sunoLink:
-            "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
-        });
+
+      const res = await request(app).post("/suno-api/submit-link").send({
+        sunoLink: "https://suno.com/song/5067b2fd-4ad4-47e5-8140-43a29e7ac9d6",
+      });
 
       expect(res.statusCode).toBe(403);
       expect(res.body.message).toContain("limit of 3 songs");
@@ -224,9 +206,7 @@ describe("Suno API Controller", () => {
     it("should return 404 if project not found", async () => {
       sunoService.getClip.mockResolvedValue({}); // No metadata
 
-      const res = await request(app).get(
-        "/suno-api/get-suno-clip/invalid-id"
-      );
+      const res = await request(app).get("/suno-api/get-suno-clip/invalid-id");
 
       expect(res.statusCode).toBe(404);
     });
@@ -506,10 +486,14 @@ describe("Suno API Controller", () => {
       const mockSunoClipStudioExport = {
         id: "dfa4cf3e-8fe4-4bbb-bb02-c25d96f5c45d",
         entity_type: "song_schema",
-        video_url: "https://cdn1.suno.ai/dfa4cf3e-8fe4-4bbb-bb02-c25d96f5c45d.mp4",
-        audio_url: "https://cdn1.suno.ai/dfa4cf3e-8fe4-4bbb-bb02-c25d96f5c45d.mp3",
-        image_url: "https://cdn2.suno.ai/51abed48-7947-4234-b3cf-c826d6551fe6.jpeg",
-        image_large_url: "https://cdn2.suno.ai/51abed48-7947-4234-b3cf-c826d6551fe6.jpeg",
+        video_url:
+          "https://cdn1.suno.ai/dfa4cf3e-8fe4-4bbb-bb02-c25d96f5c45d.mp4",
+        audio_url:
+          "https://cdn1.suno.ai/dfa4cf3e-8fe4-4bbb-bb02-c25d96f5c45d.mp3",
+        image_url:
+          "https://cdn2.suno.ai/51abed48-7947-4234-b3cf-c826d6551fe6.jpeg",
+        image_large_url:
+          "https://cdn2.suno.ai/51abed48-7947-4234-b3cf-c826d6551fe6.jpeg",
         major_model_version: "",
         model_name: "chirp-chirp",
         metadata: {
@@ -518,7 +502,7 @@ describe("Suno API Controller", () => {
           type: "studio_export",
           duration: 328.3442083333333,
           can_remix: false,
-          is_remix: false
+          is_remix: false,
         },
         is_liked: false,
         user_id: "fdf59816-eb57-4568-a93e-86e21edfd470",
@@ -537,7 +521,7 @@ describe("Suno API Controller", () => {
         play_count: 801,
         upvote_count: 169,
         is_public: true,
-        allow_comments: true
+        allow_comments: true,
       };
 
       sunoService.getClip.mockResolvedValue(mockSunoClipStudioExport);
@@ -560,9 +544,12 @@ describe("Suno API Controller", () => {
         id: "8537b0fb-eb3d-4c2a-b85e-f4b47640c285",
         entity_type: "song_schema",
         video_url: "",
-        audio_url: "https://cdn1.suno.ai/8537b0fb-eb3d-4c2a-b85e-f4b47640c285.mp3",
-        image_url: "https://cdn2.suno.ai/image_ecb44ecd-15a7-4ec3-8f6a-f69e0bf1a666.jpeg",
-        image_large_url: "https://cdn2.suno.ai/image_large_ecb44ecd-15a7-4ec3-8f6a-f69e0bf1a666.jpeg",
+        audio_url:
+          "https://cdn1.suno.ai/8537b0fb-eb3d-4c2a-b85e-f4b47640c285.mp3",
+        image_url:
+          "https://cdn2.suno.ai/image_ecb44ecd-15a7-4ec3-8f6a-f69e0bf1a666.jpeg",
+        image_large_url:
+          "https://cdn2.suno.ai/image_large_ecb44ecd-15a7-4ec3-8f6a-f69e0bf1a666.jpeg",
         major_model_version: "",
         model_name: "chirp-chirp",
         metadata: {
@@ -571,7 +558,7 @@ describe("Suno API Controller", () => {
           type: "edit_speed",
           duration: 347.85910416666667,
           can_remix: true,
-          is_remix: true
+          is_remix: true,
         },
         is_liked: false,
         user_id: "fdf59816-eb57-4568-a93e-86e21edfd470",
@@ -588,7 +575,7 @@ describe("Suno API Controller", () => {
         play_count: 1,
         upvote_count: 0,
         is_public: false,
-        allow_comments: true
+        allow_comments: true,
       };
 
       sunoService.getClip.mockResolvedValue(mockSunoClipSpeedEdit);

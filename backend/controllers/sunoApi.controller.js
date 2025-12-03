@@ -1,8 +1,8 @@
 /**
  * Suno API Controller
- * 
+ *
  * Handles interactions with the Suno API.
- * 
+ *
  * For details on the different API response structures (v4, v5, concat, upsample, cover),
  * please refer to: backend/docs/SunoApiStructures.md
  */
@@ -48,7 +48,10 @@ exports.getSunoClipExtended = async (req, res) => {
         continue_at: lastHistoryItem ? lastHistoryItem.continue_at : undefined,
         image: projectData.image_large_url,
         duration: projectData.metadata.duration,
-        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
+        modelVersion:
+          projectData.major_model_version ||
+          projectData.model_name ||
+          "Unknown",
       };
       res.json({ result: true, project });
     } else {
@@ -79,7 +82,10 @@ exports.getSunoClipCover = async (req, res) => {
         originId: originId,
         image: projectData.image_large_url,
         duration: projectData.metadata.duration,
-        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
+        modelVersion:
+          projectData.major_model_version ||
+          projectData.model_name ||
+          "Unknown",
       };
       res.json({ result: true, project });
     } else {
@@ -110,7 +116,10 @@ exports.getSunoClipInfo = async (req, res) => {
         originId: originId,
         image: projectData.image_large_url,
         duration: projectData.metadata.duration,
-        modelVersion: projectData.major_model_version || projectData.model_name || "Unknown",
+        modelVersion:
+          projectData.major_model_version ||
+          projectData.model_name ||
+          "Unknown",
       };
       res.json({ result: true, project });
     } else {
